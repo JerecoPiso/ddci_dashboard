@@ -1,5 +1,5 @@
 import { Moon, Sun } from "lucide-react"
-
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -8,10 +8,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "@/components/theme-provider"
-
-export function ModeToggle() {
+export type ThemeProps = {
+  onThemeChange: (value: string) => void; // Callback to send value to parent
+};
+export function ModeToggle({ onThemeChange } : ThemeProps) {
   const { setTheme } = useTheme()
-
+  const [ , _setTheme] = useState<string | null>('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleTheme = (theme: any) => {
+    _setTheme(theme)
+    onThemeChange(theme)
+    setTheme(theme)
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -22,13 +30,13 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => handleTheme("light")}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => handleTheme("dark")}>
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => handleTheme("system")}>
           System
         </DropdownMenuItem>
       </DropdownMenuContent>

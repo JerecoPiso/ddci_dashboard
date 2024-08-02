@@ -3,12 +3,14 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
-
+import { CookiesProvider } from "react-cookie";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <TooltipProvider>
-      <App />
+      <CookiesProvider>
+        <App />
+      </CookiesProvider>
     </TooltipProvider>
   </React.StrictMode>
 );
