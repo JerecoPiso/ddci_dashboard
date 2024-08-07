@@ -4,6 +4,7 @@ import CurrentVolume from "@/pages/dashboard/chartandtables/currentvolume";
 import Login from "@/pages/auth/login"
 import Main from "@/pages/main";
 // import TaskPage from '@/components/tasks/page'
+import Accuracy from "@/pages/dashboard/chartandtables/accuracy";
 import Statistics from "@/pages/dashboard/chartandtables/statistics";
 import TurnAroundTime from "./pages/dashboard/chartandtables/turnaroundtime";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -12,11 +13,12 @@ function App() {
   return (
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <BrowserRouter>
+        <BrowserRouter basename="/ddci">
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<Main />}>
               <Route index path="statistics" element={<Statistics />} />
+              <Route index path="accuracy" element={<Accuracy />} />
               <Route index path="currentvolume" element={<CurrentVolume />} />
               <Route index path="bolmanagement" element={<BolManagement />} />
               <Route index path="turnaroundtime" element={<TurnAroundTime />} />

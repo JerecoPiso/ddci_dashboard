@@ -9,6 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
 import {
   UserCircle,
@@ -17,12 +18,13 @@ import {
   Package2,
   PanelLeft,
   Home,
+  // CheckCheck,
   LayoutDashboard,
-  ShoppingCart,
-  Package,
-  LineChart,
-  Users2,
-  Timer
+  // ShoppingCart,
+  // Package,
+  // LineChart,
+  // Users2,
+  Timer,
   // Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,7 +39,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 // import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useCookies } from "react-cookie";
+// import { useCookies } from "react-cookie";
+import Cookies from "js-cookie";
 // import Cookies from "node_modules/@types/js-cookie";
 // Cookies.get("token")
 import {
@@ -48,9 +51,10 @@ import {
 import { ModeToggle } from "@/components/mode-toggle";
 // import Cookies from "js-cookie";
 function Main() {
-  const [cookies, , removeCookie] = useCookies(["token"], {
-    doNotUpdate: true,
-  });
+  // const [cookies,  , removeCookie] = useCookies(["token"], {
+  //   doNotUpdate: true,
+
+  // });
   const path = useLocation();
   const navigate = useNavigate();
   const currentPath = path.pathname;
@@ -65,22 +69,29 @@ function Main() {
     setThemeValue(value); // Update state with the value from the child
   };
   const logoutUser = () => {
-    removeCookie("token", { maxAge: 0 });
+    
+    Cookies.remove("token");
+    Cookies.remove("_clients");
+    navigate("/");
+    //removeCookie("token", { maxAge: 0 });
   };
   useEffect(() => {
-    if (!cookies.token) {
+    // if (!cookies.token) {
+    //   navigate("/");
+    // }
+    if (!Cookies.get("token")) {
       navigate("/");
     }
-  }, [cookies.token, currentPath, navigate]);
+  }, [navigate]);
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <aside className="bg-red-800 dark:bg-background fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+      <aside className="bg-red-800 dark:bg-background fixed inset-y-0 left-0 z-40 hidden w-14 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
                 to="#"
-                className="flex h-9 w-9  items-center justify-center bg-accent rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8"
+                className="flex h-9 w-1  items-center justify-center bg-accent rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <LayoutDashboard className="h-5 w-5" />
                 <span className="sr-only">Dashboard</span>
@@ -140,34 +151,7 @@ function Main() {
                   <Home className="h-5 w-5" />
                   Dashboard
                 </Link>
-                <Link
-                  to="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  Orders
-                </Link>
-                <Link
-                  to="#"
-                  className="flex items-center gap-4 px-2.5 text-foreground"
-                >
-                  <Package className="h-5 w-5" />
-                  Products
-                </Link>
-                <Link
-                  to="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Users2 className="h-5 w-5" />
-                  Customers
-                </Link>
-                <Link
-                  to="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <LineChart className="h-5 w-5" />
-                  Settings
-                </Link>
+               
               </nav>
             </SheetContent>
           </Sheet>
@@ -175,11 +159,10 @@ function Main() {
             <img
               src={theme === "dark" ? ddc_connect3 : ddc_connect}
               alt=""
-              className="h-[3.5em] w-full -mt-2 -ml-[10px]"
+              className="h-[3.5em] w-full md:-mt-2 mt-0 -ml-[10px]"
             />
           </div>
-          <div className="relative ml-auto flex-1 md:grow-0">
-          </div>
+          <div className="relative ml-auto flex-1 md:grow-0"></div>
           <ModeToggle onThemeChange={handleThemeChange} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -209,6 +192,7 @@ function Main() {
                 Are you sure you want to logout?
               </AlertDialogTitle>
             </AlertDialogHeader>
+            <AlertDialogDescription></AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleLogout}>
                 Cancel
@@ -223,7 +207,7 @@ function Main() {
           </AlertDialogContent>
         </AlertDialog>
         <div className="flex flex-wrap gap-1 p-4 sm:px-6 sm:py-0 md:gap-1">
-        {/* <Link
+          {/* <Link
             to={"/dashboard/statistics"}
             className={`${
               currentPath.includes("statistics")
@@ -243,6 +227,16 @@ function Main() {
           >
             <SquareChartGantt className="h-5 w-5" /> BOL Management
           </Link>
+           {/* <Link
+            to={"/dashboard/accuracy"}
+            className={`${
+              currentPath.includes("accuracy")
+                ? "dark:bg-slate-100 dark:text-slate-900 bg-red-800 text-slate-100"
+                : "dark:bg-slate-700 dark:text-white"
+            } flex gap-x-2 items-center  border border-slate-900/10 rounded-sm w-auto px-3 py-2 hover:bg-red-800 hover:text-white dark:hover:bg-slate-100 dark:hover:text-slate-900`}
+          >
+            <CheckCheck className="h-5 w-5" /> Accuracy
+          </Link> */}
           <Link
             to={"/dashboard/currentvolume"}
             className={`${

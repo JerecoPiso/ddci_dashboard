@@ -29,12 +29,22 @@ import { DataTableToolbar } from "./data-table-toolbar"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  data: TData[],
+  filterChange: (filter: string) => void,
+  changePage: (movement: string, rowSize?: string) => void,
+  onFilterStatus: (status: string) => void,
+  pageCount: number,
+  pageNumber: number
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  filterChange,
+  changePage,
+  pageCount,
+  pageNumber,
+  onFilterStatus
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -43,7 +53,12 @@ export function DataTable<TData, TValue>({
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
-
+  const onChangeFilter = (filter: string) => {
+    filterChange(filter)
+  }
+  const handleFilterStatus = (status: string) => {
+    onFilterStatus(status)
+  }
   const table = useReactTable({
     data,
     columns,
@@ -51,9 +66,10 @@ export function DataTable<TData, TValue>({
       sorting,
       columnVisibility,
       rowSelection,
-      columnFilters,
+      columnFilters
     },
     enableRowSelection: true,
+    pageCount: pageCount,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -65,11 +81,14 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
-
+  const onChangePage = (movement: string, rowSize?: string) => {
+    table.nextPage()
+    changePage(movement, rowSize)
+  }
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} />
-      <div className="rounded-md border">
+      <DataTableToolbar table={table} onChangeFilter={onChangeFilter} onFilterStatus={handleFilterStatus} />
+      <div className="rounded-md border min-h-[400px] max-h-[400px] overflow-auto">
         <Table>
           <TableHeader className="bg-red-800 dark:bg-slate-800 ">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -119,7 +138,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} changePage={onChangePage} pageNumber={pageNumber} pageCount={pageCount} />
     </div>
   )
 }

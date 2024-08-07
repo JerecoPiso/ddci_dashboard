@@ -1,25 +1,42 @@
-import { CircleCheckBig, ScanText, ImageUp } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
-import { useEffect, useState, useRef } from "react";
-import { useCookies } from "react-cookie";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Card,
-  CardContent,
-  // CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import axios from "axios";
+  CircleCheckBig,
+  ScanText,
+  ImageUp,
+  Calendar as CalendarIcon,
+} from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, XAxis, LabelList } from "recharts";
+import { useEffect, useState, useRef } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { getProdDate } from "@/variables/dates";
+import { useNavigate } from "react-router-dom";
+import ClientSelector from "@/components/ClientSelector";
+import Cookies from "js-cookie";
+import axios from "axios";
+interface Clients {
+  name: string;
+}
 function CurrentVolume() {
-  // const [bols, setBols] = useState<[]>([]);
+  const navigate = useNavigate();
   const hasFetchedData = useRef(false);
-  const [cookies] = useCookies(["token"]);
+  const [date, setDate] = useState<Date>();
+  const [client, setClient] = useState<string>("");
+  const [, setClients] = useState<Clients[]>([]);
   const [chartData, setChartData] = useState([
     { status: "UPLOADED", count: 0 },
     { status: "OCRED", count: 0 },
@@ -31,49 +48,105 @@ function CurrentVolume() {
       color: "hsl(var(--chart-01))",
     },
   } satisfies ChartConfig;
-  const getBOL = async () => {
-    const response = await axios.get(
-      "http://192.168.23.84:8007/ddcic/api/beta/document/active",
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${cookies.token}`,
-        },
-      }
-    );
-    if (response.status === 200) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      response.data.forEach((el: any) => {
-        if(el.status == "UPLOADED"){
-          updateAccuracy(0)
-        }else if(el.status == "OCRED"){
-          updateAccuracy(1)
-        }else if(el.status == "BILLED"){
-          updateAccuracy(2)
+  const getVolumes = async () => {
+    try {
+      const _prod_date = getProdDate(date);
+      const clientName = client ? client : getDefaultClient();
+
+      const response = await axios.post(
+        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/count/${clientName}/${_prod_date}`,
+        [],
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
         }
-      });
+      );
+      if (response.status === 200) {
+        updateAccuracy(0, response.data.details["UPLOADED"]);
+        updateAccuracy(1, response.data.details["OCRED"]);
+        updateAccuracy(2, response.data.details["EDITED"]);
+      }
+      hasFetchedData.current = false;
+    } catch (err: any) {
+      if (err.response.status === 403) {
+        Cookies.remove("_clients");
+        Cookies.remove("token");
+        navigate("/");
+      }
     }
   };
-  const updateAccuracy = (index: number) => {
+  const updateAccuracy = (index: number, total: number) => {
     setChartData((prevChartData) =>
       prevChartData.map((data, i) =>
-        i === index
-          ? { ...data, count: data.count + 1 }
-          : data
+        i === index ? { ...data, count: total } : data
       )
     );
   };
+  const handleClient = (_client: string) => {
+    hasFetchedData.current = false;
+    setClient(_client);
+  };
+  const getDefaultClient = () => {
+    const __clients = JSON.parse(Cookies.get("_clients") || "");
+    return __clients[0];
+  };
+  useEffect(() => {
+    const __clients = JSON.parse(Cookies.get("_clients") || "");
+    const clientsList: Clients[] = [];
+    __clients.forEach((el: any) => {
+      clientsList.push(el);
+    });
+    setClients(clientsList);
+    if (client == "") {
+      setClient(__clients[0]);
+    }
+    // setClient(__clients[0])
+  }, [client]);
   useEffect(() => {
     if (!hasFetchedData.current) {
-      getBOL();
+      getVolumes();
       hasFetchedData.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [date, client]);
   return (
     <Card x-chunk="dashboard-06-chunk-0">
       <CardHeader>
-        <CardTitle>Current Volume</CardTitle>
+        <CardTitle>
+          <div className="flex md:flex-row flex-col md:justify-between justify-normal md:items-center items-start gap-2">
+            <p>Current Volume</p>
+            <div className="flex items-center gap-x-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[280px] justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <ClientSelector
+                onClientChange={handleClient}
+                activeClient={client}
+              />
+            </div>
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-12 gap-2">
@@ -85,10 +158,10 @@ function CurrentVolume() {
                   className="text-blue-600 dark:text-muted-foreground"
                 />
                 <div>
-                  <p className="text-lg text-muted-foreground">
-                    Uploaded
+                  <p className="text-lg text-muted-foreground">Uploaded</p>
+                  <p className=" text-muted-foreground text-lg">
+                    {chartData[0].count}
                   </p>
-                  <p className=" text-muted-foreground text-lg">{chartData[0].count}</p>
                 </div>
               </div>
               <div className="flex gap-x-2 items-center  border rounded-md shadow-sm p-2 mt-2">
@@ -97,10 +170,10 @@ function CurrentVolume() {
                   className="text-green-600 dark:text-muted-foreground"
                 />
                 <div>
-                  <p className="text-lg text-muted-foreground">
-                    Ocred
+                  <p className="text-lg text-muted-foreground">Ocred</p>
+                  <p className=" text-muted-foreground text-lg">
+                    {chartData[1].count}
                   </p>
-                  <p className=" text-muted-foreground text-lg">{chartData[1].count}</p>
                 </div>
               </div>
               <div className="flex gap-x-2 items-center  border rounded-md shadow-sm p-2 mt-2">
@@ -109,20 +182,16 @@ function CurrentVolume() {
                   className="text-red-600 dark:text-muted-foreground"
                 />
                 <div>
-                  <p className="text-lg text-muted-foreground">
-                    Billed
+                  <p className="text-lg text-muted-foreground">Billed</p>
+                  <p className=" text-muted-foreground text-lg">
+                    {chartData[2].count}
                   </p>
-                  <p className=" text-muted-foreground text-lg">{chartData[2].count}</p>
                 </div>
               </div>
             </div>
           </div>
           <div className="md:col-span-10 col-span-12">
             <Card>
-              <CardHeader>
-                <CardTitle>Bar Chart</CardTitle>
-                {/* <CardDescription>January - June 2024</CardDescription> */}
-              </CardHeader>
               <CardContent>
                 <ChartContainer
                   config={chartConfig}
@@ -135,13 +204,21 @@ function CurrentVolume() {
                       tickLine={false}
                       tickMargin={10}
                       axisLine={false}
-                      // tickFormatter={(value) => value.slice(0, 3)}
                     />
                     <ChartTooltip
                       cursor={false}
                       content={<ChartTooltipContent hideLabel />}
                     />
-                    <Bar dataKey="count" fill="var(--color-count)" radius={8} />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={8}>
+                      <LabelList
+                        position="middle"
+                        dataKey="count"
+                        fontSize={14}
+                        fontWeight={500}
+                        className="fill-background"
+                        fillOpacity={1}
+                      />
+                    </Bar>
                   </BarChart>
                 </ChartContainer>
               </CardContent>

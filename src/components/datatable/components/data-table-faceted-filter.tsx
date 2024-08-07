@@ -74,7 +74,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         {options.map((option) => {
           const isSelected = selectedValues.has(option.value);
           return (
-            <div
+            <div key={option.value}
               className="flex items-center cursor-pointer  px-2 py-1 uppercase text-xs"
               onClick={() => {
                 selectedValues.add(option.value);

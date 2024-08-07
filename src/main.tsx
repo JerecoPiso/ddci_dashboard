@@ -8,7 +8,7 @@ import { CookiesProvider } from "react-cookie";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <TooltipProvider>
-      <CookiesProvider>
+      <CookiesProvider >
         <App />
       </CookiesProvider>
     </TooltipProvider>

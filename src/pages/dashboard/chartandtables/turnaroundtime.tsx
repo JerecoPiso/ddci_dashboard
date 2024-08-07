@@ -1,48 +1,68 @@
-import { useState } from "react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pie, PieChart, LabelList } from "recharts";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useState, useEffect, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Pie, PieChart, LabelList } from "recharts";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { getProdDate } from "@/variables/dates";
+import { useNavigate } from "react-router-dom";
+
+import ClientSelector from "@/components/ClientSelector";
+import Cookies from "js-cookie";
+import axios from "axios";
 type ChartData = {
   index: number;
   count: number;
   time_range: string;
   fill: string;
 };
-const generateRandomNumber = () => {
-  const number = Math.floor(Math.random() * 100) + 1; // Generates a number between 1 and 100
-  return number;
-};
+interface Clients {
+  name: string;
+}
 const generateChartData = (
   time_range: string[],
   colors: string[]
 ): ChartData[] => {
   return time_range.map((time_range, index) => ({
     index,
-    count: generateRandomNumber(),
+    count: 0,
     time_range: time_range,
     fill: colors[index] || "var(--default-color)",
   }));
 };
 function TurnAroundTime() {
+  const hasFetchedData = useRef(false);
+  const navigate = useNavigate();
+  const [date, setDate] = useState<Date>();
+  const [client, setClient] = useState<string>("");
+  const [, setClients] = useState<Clients[]>([]);
   const _colors = ["#0A2647", "#144272", "#205295", "#2C74B3"];
   const ranges = ["Under 2 mins", "2-5 mins", "5-10 mins", "10 mins above"];
-  const [elapsedTimeChartData] = useState<ChartData[]>(() =>
-    generateChartData(ranges, _colors)
+  const [elapsedTimeChartData, setElapsedTimeChartData] = useState<ChartData[]>(
+    () => generateChartData(ranges, _colors)
   );
-  const [timeAesChartData] = useState<ChartData[]>(() =>
-    generateChartData(ranges, _colors)
+  const [capturingChartData, setChapturingChartData] = useState<ChartData[]>(
+    () => generateChartData(ranges, _colors)
   );
-  const [timeExtractionChartData] = useState<ChartData[]>(() =>
-    generateChartData(ranges, _colors)
+  const [processingChartData, setProcessingChartData] = useState<ChartData[]>(
+    () => generateChartData(ranges, _colors)
   );
-  const [timeStructuringChartData] = useState<ChartData[]>(() =>
-    generateChartData(ranges, _colors)
+  const [validationChartData, setValidationChartData] = useState<ChartData[]>(
+    () => generateChartData(ranges, _colors)
   );
   const chartConfig = {
     visitors: {
@@ -57,17 +77,202 @@ function TurnAroundTime() {
     _5_10mins: {
       label: "5-10 mins",
     },
-    _10_15mins: {
-      label: "10-15 mins",
-    },
-    _15mins_above: {
+    _10mins_above: {
       label: "15 mins above",
     },
   } satisfies ChartConfig;
+  const updateElapse = (index: number, type: string, total: number) => {
+    if (type === "elapse") {
+      setElapsedTimeChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, count: total } : data
+        )
+      );
+    } else if (type === "capturing") {
+      setChapturingChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, count: total } : data
+        )
+      );
+    } else if (type === "processing") {
+      setProcessingChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, count: total } : data
+        )
+      );
+    } else if (type === "validation") {
+      setValidationChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, count: total } : data
+        )
+      );
+    }
+  };
+  const getElapseTime = async () => {
+    try {
+      const data = [
+        {
+          minValue: 0,
+          maxValue: 120,
+        },
+        {
+          minValue: 121,
+          maxValue: 300,
+        },
+        {
+          minValue: 301,
+          maxValue: 600,
+        },
+        {
+          minValue: 601,
+          maxValue: 10000,
+        },
+      ];
+      const values = [
+        "0.00-120.00",
+        "121.00-300.00",
+        "301.00-600.00",
+        "601.00-10000.00",
+      ];
+      const _prod_date = getProdDate(date);
+      const clientName = client ? client : getDefaultClient();
+
+      const elapse = await axios.post(
+        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/elapse/${clientName}/${_prod_date}`,
+        JSON.stringify(data),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      if (elapse.status == 200) {
+        const _elapse = elapse.data.details;
+        for (let i = 0; i < values.length; i++) {
+          updateElapse(i, "elapse", _elapse[values[i]]);
+        }
+      }
+      const capturing = await axios.post(
+        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/upload-elapse`,
+        JSON.stringify(data),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      if (capturing.status == 200) {
+        const _capturing = capturing.data.details;
+        for (let i = 0; i < values.length; i++) {
+          updateElapse(i, "capturing", _capturing[values[i]]);
+        }
+      }
+      const processing = await axios.post(
+        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/ocr-elapse`,
+        JSON.stringify(data),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      if (processing.status == 200) {
+        const _processing = processing.data.details;
+        for (let i = 0; i < values.length; i++) {
+          updateElapse(i, "processing", _processing[values[i]]);
+        }
+      }
+      const validation = await axios.post(
+        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/edit-elapse`,
+        JSON.stringify(data),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      if (validation.status == 200) {
+        const _validation = validation.data.details;
+        for (let i = 0; i < values.length; i++) {
+          updateElapse(i, "validation", _validation[values[i]]);
+        }
+      }
+      hasFetchedData.current = false;
+    } catch (err: any) {
+      if (err.response.status === 403) {
+        Cookies.remove("_clients");
+        Cookies.remove("token");
+        navigate("/");
+      }
+    }
+  };
+  const handleClient = (_client: string) => {
+    hasFetchedData.current = false;
+    setClient(_client);
+  };
+  const getDefaultClient = () => {
+    const __clients = JSON.parse(Cookies.get("_clients") || "");
+    return __clients[0];
+  };
+  useEffect(() => {
+    const __clients = JSON.parse(Cookies.get("_clients") || "");
+    const clientsList: Clients[] = [];
+    __clients.forEach(
+      (el: any) => {
+        clientsList.push(el);
+      },
+    );
+    if(client == ''){
+      setClient(__clients[0])
+    }
+    setClients(clientsList);
+    // setClient(__clients[0])
+  }, [client]);
+  useEffect(() => {
+    if (!hasFetchedData.current) {
+      getElapseTime();
+
+      hasFetchedData.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, client]);
   return (
     <Card x-chunk="dashboard-06-chunk-0">
       <CardHeader>
-        <CardTitle>Turn Around Time</CardTitle>
+        <CardTitle>
+        <div className="flex md:flex-row flex-col md:justify-between justify-normal md:items-center items-start gap-2">
+            <p>Turn Arround Time</p>
+            <div className="flex items-center gap-x-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[280px] justify-start text-left font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <ClientSelector onClientChange={handleClient} activeClient={client} />
+            </div>
+          </div>
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Card className="flex flex-col">
@@ -117,14 +322,14 @@ function TurnAroundTime() {
                           data={elapsedTimeChartData}
                           dataKey="count"
                           nameKey="time_range"
-                          //   innerRadius="30%"
+                          fontWeight={900}
                         >
                           <LabelList
                             dataKey="count"
                             className="fill-background"
                             stroke="none"
-                            fontWeight="normal"
-                            fontSize={12}
+                            fontWeight="bold"
+                            fontSize={14}
                           />
                         </Pie>
                       </PieChart>
@@ -146,7 +351,7 @@ function TurnAroundTime() {
                           }
                         />
                         <Pie
-                          data={timeAesChartData}
+                          data={capturingChartData}
                           dataKey="count"
                           nameKey="time_range"
                         >
@@ -154,8 +359,8 @@ function TurnAroundTime() {
                             dataKey="count"
                             className="fill-background"
                             stroke="none"
-                            fontWeight="normal"
-                            fontSize={12}
+                            fontWeight="bold"
+                            fontSize={14}
                           />
                         </Pie>
                       </PieChart>
@@ -177,7 +382,7 @@ function TurnAroundTime() {
                           }
                         />
                         <Pie
-                          data={timeExtractionChartData}
+                          data={processingChartData}
                           dataKey="count"
                           nameKey="time_range"
                         >
@@ -185,8 +390,8 @@ function TurnAroundTime() {
                             dataKey="count"
                             className="fill-background"
                             stroke="none"
-                            fontWeight="normal"
-                            fontSize={12}
+                            fontWeight="bold"
+                            fontSize={14}
                           />
                         </Pie>
                       </PieChart>
@@ -208,16 +413,16 @@ function TurnAroundTime() {
                           }
                         />
                         <Pie
-                          data={timeStructuringChartData}
+                          data={validationChartData}
                           dataKey="count"
                           nameKey="time_range"
                         >
                           <LabelList
                             dataKey="count"
-                            className="fill-background"
-                            stroke="none"
-                            fontWeight="normal"
-                            fontSize={12}
+                            className="fill-background "
+                            stroke="normal"
+                            fontWeight="bold"
+                            fontSize={14}
                           />
                         </Pie>
                       </PieChart>

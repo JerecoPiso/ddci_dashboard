@@ -1,30 +1,34 @@
 import { CheckIcon, PlusCircleIcon } from "lucide-react";
-  export const type = [
-    {
-      value: "BILL_OF_LADING",
-      label: "BILL_OF_LADING",
-    }
-  ]
-  
-  export const statuses = [
-    {
-        value: "UPLOADED",
-        label: "UPLOADED",
-        icon: CheckIcon
-      },
-      {
-        value: "OCRED",
-        label: "OCRED",
-        icon: CheckIcon
-      },
-      {
-        value: "BILLED",
-        label: "BILLED",
-        icon: PlusCircleIcon
-      },
-      
-  ]
-  
+export const type = [
+  {
+    value: "BILL_OF_LADING",
+    label: "BILL_OF_LADING",
+  },
+];
+
+export const statuses = [
+  {
+    value: "ALL",
+    label: "ALL",
+    icon: PlusCircleIcon,
+  },
+  {
+    value: "UPLOADED",
+    label: "UPLOADED",
+    icon: CheckIcon,
+  },
+  {
+    value: "OCRED",
+    label: "OCRED",
+    icon: CheckIcon,
+  },
+  {
+    value: "EDITED",
+    label: "EDITED",
+    icon: PlusCircleIcon,
+  },
+];
+
 //   export const priorities = [
 //     {
 //       label: "Low",
@@ -42,4 +46,3 @@ import { CheckIcon, PlusCircleIcon } from "lucide-react";
 //       icon: ArrowUpIcon,
 //     },
 //   ]
-  
