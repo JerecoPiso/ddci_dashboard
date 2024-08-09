@@ -5,7 +5,10 @@ export type BOL = {
   production: string;
   status: string;
   createdat: string;
-  accuracy: string
+  accuracy: string,
+  elapse: string,
+  turnaroundtime: string,
+  priority: string
 };
 export type AccuracyData = {
   index: number;

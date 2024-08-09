@@ -26,10 +26,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Cookies from "js-cookie";
-import { formatDate } from "@/utils/date";
+import { formatDate, convertSeconds } from "@/utils/date";
 import { Pie, PieChart } from "recharts";
-import { DataTable } from "@/components/datatable/components/data-table";
-import { columns } from "@/components/datatable/components/columns";
+import { DataTable } from "@/components/datatable/bolmanagement/data-table";
+import { columns } from "@/components/datatable/bolmanagement/columns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BOL, AccuracyData, generateAccuracyData } from "@/variables/bol";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +38,9 @@ import axios from "axios";
 import ClientSelector from "@/components/ClientSelector";
 interface Clients {
   name: string;
+}
+interface DocumentSaveDates {
+  dates: string;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BolManagement() {
@@ -146,11 +149,15 @@ function BolManagement() {
         },
       });
       if (response.status === 200) {
+        // console.log(response.data.details);
         const _bols: BOL[] = [];
         if (response.data.details) {
           setPageCount(response.data.details.pageCount);
           response.data.details.list.forEach((el: any) => {
             let accuracy_total: number = 0;
+            let elapse: number = 0;
+            const document_save_dates: DocumentSaveDates[] = [];
+            let _turnAroundSeconds: number = 0
             if (Object.keys(el.attributes).length > 0) {
               accuracy_total =
                 ((parseFloat(el.attributes["billto-accuracy"]) +
@@ -161,8 +168,27 @@ function BolManagement() {
                   parseFloat(el.attributes["shipper-accuracy"])) /
                   6) *
                 100;
+              elapse =
+                parseFloat(el.attributes["edit-elapse"]) +
+                parseFloat(el.attributes["ocr-elapse"]) +
+                parseFloat(el.attributes["upload-elapse"]);
+              el.processes.forEach((e: any) => {
+                if (e.name === "DOCUMENT_SAVE") {
+                  document_save_dates.push(e.endTime);
+                }
+              });
+              const dates: Date[] = document_save_dates.map(
+                (dateTime) => new Date(dateTime.toString())
+              );
+              const maxDate: Date = new Date(
+                Math.max(...dates.map((date) => date.getTime()))
+              );
+              const _createdAt = new Date(el.createdAt);
+              const _processEndTime = new Date(maxDate.toISOString().slice(0, 19));
+              _turnAroundSeconds  = _processEndTime.getTime() - _createdAt.getTime();
             }
-            const _accuracy: number = accuracy_total;
+            // const _accuracy: number = accuracy_total;
+            // console.log(`${el.priority}`)
             _bols.push({
               document: el.document,
               client: el.client,
@@ -170,7 +196,10 @@ function BolManagement() {
               production: el.production,
               status: el.status,
               createdat: formatDate(el.createdAt),
-              accuracy: _accuracy.toFixed(2),
+              accuracy: accuracy_total.toFixed(2),
+              elapse: convertSeconds(elapse),
+              turnaroundtime: convertSeconds(_turnAroundSeconds/1000),
+              priority: el.priority > 0 ? 'Yes' : 'No'
             });
           });
         } else {
@@ -292,7 +321,7 @@ function BolManagement() {
       if (err.response.status === 403) {
         Cookies.remove("_clients");
         Cookies.remove("token");
-        navigate("/")
+        navigate("/");
       }
     }
   };
@@ -327,17 +356,23 @@ function BolManagement() {
     const __clients = JSON.parse(Cookies.get("_clients") || "");
     return __clients[0];
   };
+  // const setCookie = (cookieValue: string) => {
+  //   const currentDate = new Date();
+  //   const expirationDate = new Date(currentDate.getTime() + 1 * 60 * 60 * 1000);
+  //   Cookies.set("activeClient", cookieValue, {
+  //     path: "/",
+  //     expires: expirationDate,
+  //   });
+  // }
   useEffect(() => {
     const __clients = JSON.parse(Cookies.get("_clients") || "");
     const clientsList: Clients[] = [];
-    __clients.forEach(
-      (el: any) => {
-        clientsList.push(el);
-      },
-    );
+    __clients.forEach((el: any) => {
+      clientsList.push(el);
+    });
     setClients(clientsList);
-    if(client == ''){
-      setClient(__clients[0])
+    if (client == "") {
+      setClient(__clients[0]);
     }
     // setClient(__clients[0 ])
   }, [client]);
@@ -356,6 +391,9 @@ function BolManagement() {
     status: item.status,
     createdat: item.createdat,
     accuracy: item.accuracy,
+    elapse: item.elapse,
+    turnaroundtime: item.turnaroundtime,
+    priority: item.priority
   }));
   return (
     <Card x-chunk="dashboard-06-chunk-0">
@@ -386,7 +424,10 @@ function BolManagement() {
                   />
                 </PopoverContent>
               </Popover>
-              <ClientSelector onClientChange={handleClient} activeClient={client} />
+              <ClientSelector
+                onClientChange={handleClient}
+                activeClient={client}
+              />
             </div>
           </div>
         </CardTitle>

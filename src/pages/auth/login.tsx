@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import ddc_connect from "../../../public/new.png";
 import ddc_connect3 from "../../../public/ddc_connect3.png";
@@ -45,6 +46,7 @@ function Login() {
         user
       );
       if (response.status == 200) {
+        console.log(response.data.details)
         const currentDate = new Date();
         const expirationDate = new Date(
           currentDate.getTime() + 1 * 60 * 60 * 1000
@@ -53,8 +55,6 @@ function Login() {
           path: "/",
           expires: expirationDate,
         });
-        // JSON.stringify(['ESTES', 'DYLT'])
-        // JSON.stringify(response.data.details.clients
         Cookies.set("_clients", JSON.stringify(response.data.details.clients), {
           path: "/",
           expires: expirationDate,
@@ -62,7 +62,7 @@ function Login() {
         navigate("/dashboard/bolmanagement");
       }
       setIsLogin(false);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     } catch (err: any) {
       alert(err.response.data.message);
       setIsLogin(false);

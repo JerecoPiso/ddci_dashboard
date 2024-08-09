@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react"
 import {
   ColumnDef,
@@ -14,6 +14,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
+import { DataTableRowActions } from "../components/data-table-row-actions"
 
 import {
   Table,
@@ -30,21 +31,16 @@ import { DataTableToolbar } from "./data-table-toolbar"
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[],
-  filterChange: (filter: string) => void,
-  changePage: (movement: string, rowSize?: string) => void,
-  onFilterStatus: (status: string) => void,
-  pageCount: number,
-  pageNumber: number
+  addUser: () => void;
+  onDelete: (id: any, username: any) => void,
+  onUpdate: (userInfo: any) => void
 }
-
 export function DataTable<TData, TValue>({
   columns,
   data,
-  filterChange,
-  changePage,
-  pageCount,
-  pageNumber,
-  onFilterStatus
+  addUser,
+  onDelete,
+  onUpdate
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -53,12 +49,6 @@ export function DataTable<TData, TValue>({
     []
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
-  const onChangeFilter = (filter: string) => {
-    filterChange(filter)
-  }
-  const handleFilterStatus = (status: string) => {
-    onFilterStatus(status)
-  }
   const table = useReactTable({
     data,
     columns,
@@ -66,10 +56,9 @@ export function DataTable<TData, TValue>({
       sorting,
       columnVisibility,
       rowSelection,
-      columnFilters
+      columnFilters,
     },
     enableRowSelection: true,
-    pageCount: pageCount,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -81,21 +70,28 @@ export function DataTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
-  const onChangePage = (movement: string, rowSize?: string) => {
-    table.nextPage()
-    changePage(movement, rowSize)
+  const handleAddUser = () => {
+    addUser()
+  }
+  const handleDelete = (values: any) => {
+    onDelete(values.id, values.username)
+    // console.log(values.id)
+  }
+  const handleUpdate = (values: any) => {
+    onUpdate(values)
+    
   }
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} onChangeFilter={onChangeFilter} onFilterStatus={handleFilterStatus} />
-      <div className="rounded-md border min-h-[400px] max-h-[400px] overflow-auto">
+      <DataTableToolbar table={table} addUser={handleAddUser} />
+      <div className="rounded-md border">
         <Table>
-          <TableHeader className="bg-red-800 dark:bg-slate-800 ">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} >
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead className="text-white hover:text-slate-800" key={header.id} colSpan={header.colSpan}>
+                    <TableHead key={header.id} colSpan={header.colSpan}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -115,8 +111,13 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells().map((cell, index) => (
                     <TableCell key={cell.id}>
+                      {/* {JSON.stringify(cell.row.original)} */}
+                      {
+                        index === 8 ? <DataTableRowActions onDelete={() => handleDelete(cell.row.original)} onUpdate={() => handleUpdate(cell.row.original)} /> : ''
+                      }
+                      {/* <DataTableRowActions /> */}
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -138,7 +139,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} changePage={onChangePage} pageNumber={pageNumber} pageCount={pageCount} />
+      <DataTablePagination table={table} />
     </div>
   )
 }
