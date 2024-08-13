@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import ddc_connect from "/new.png";
 import ddc_connect3 from "/ddc_connect3.png";
-import { User2, SquareChartGantt, ImageDown, Timer } from "lucide-react";
+import { User2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/tooltip";
 import { ModeToggle } from "@/components/mode-toggle";
 function Main() {
-  const [roles, setRoles] = useState<string>();
   const navigate = useNavigate();
   const path = useLocation();
   const currentPath = path.pathname;
@@ -57,27 +56,19 @@ function Main() {
     navigate("/");
   };
   useEffect(() => {
-    setRoles(JSON.stringify(Cookies.get("_authorities")));
-    // console.log(typeof JSON.parse(Cookies.get('_authorities')) || '')
     if (!Cookies.get("token")) {
       navigate("/");
     }
   }, [navigate]);
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <aside className="bg-red-800 dark:bg-background fixed inset-y-0 left-0 z-40 hidden w-14 flex-col border-r bg-background sm:flex">
+      <aside className="bg-red-800 dark:bg-background fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                to="/dashboard/"
-                className={`${
-                  currentPath === "/dashboard/" ||
-                  currentPath === "/dashboard/" ||
-                  currentPath === "/dashboard/"
-                    ? "bg-accent"
-                    : "text-white"
-                } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
+               to="/dashboard/bolmanagement"
+                className={`${currentPath === '/dashboard/bolmanagement' || currentPath === '/dashboard/currentvolume' || currentPath === '/dashboard/turnaroundtime' ? 'bg-accent' : 'text-white'} flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
               >
                 <LayoutDashboard className="h-5 w-5" />
                 <span className="sr-only">Dashboard </span>
@@ -88,78 +79,18 @@ function Main() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                to="/dashboard/bolmanagement"
-                className={`${
-                  currentPath === "/dashboard/bolmanagement" ||
-                  currentPath === "/dashboard/bolmanagement" ||
-                  currentPath === "/dashboard/bolmanagement"
-                    ? "bg-accent"
-                    : "text-white"
-                } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
+                to="/dashboard/usermanagement"
+                className={`${currentPath === '/dashboard/usermanagement' ? 'bg-accent' : 'text-white'} flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
               >
-                <SquareChartGantt className="h-5 w-5" />
-                <span className="sr-only">BOL Management </span>
+                <User2 className="h-5 w-5" />
+                <span className="sr-only">Users</span>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">BOL Management</TooltipContent>
+            <TooltipContent side="right">Users</TooltipContent>
           </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                to="/dashboard/currentvolume"
-                className={`${
-                  currentPath === "/dashboard/currentvolume" ||
-                  currentPath === "/dashboard/currentvolume" ||
-                  currentPath === "/dashboard/currentvolume"
-                    ? "bg-accent"
-                    : "text-white"
-                } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
-              >
-                <ImageDown className="h-5 w-5" />
-                <span className="sr-only">Current Volume </span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Current Volume </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                to="/dashboard/turnaroundtime"
-                className={`${
-                  currentPath === "/dashboard/turnaroundtime" ||
-                  currentPath === "/dashboard/turnaroundtime" ||
-                  currentPath === "/dashboard/turnaroundtime"
-                    ? "bg-accent"
-                    : "text-white"
-                } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
-              >
-                <Timer className="h-5 w-5" />
-                <span className="sr-only">Turn Around Time </span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right">Turn Around Time </TooltipContent>
-          </Tooltip>
-          {roles?.includes("ROLE_ADMIN") && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  to="/dashboard/usermanagement"
-                  className={`${
-                    currentPath === "/dashboard/usermanagement"
-                      ? "bg-accent"
-                      : "text-white"
-                  } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
-                >
-                  <User2 className="h-5 w-5" />
-                  <span className="sr-only">Users</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Users</TooltipContent>
-            </Tooltip>
-          )}
         </nav>
       </aside>
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-60">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
             <SheetTrigger asChild>
@@ -184,6 +115,7 @@ function Main() {
                   <Home className="h-5 w-5" />
                   Dashboard
                 </Link>
+               
               </nav>
             </SheetContent>
           </Sheet>
@@ -193,7 +125,7 @@ function Main() {
               alt=""
               className="h-[3.5em] w-full md:-mt-2 mt-0 -ml-[10px]"
             />
-          </div>
+          </div> 
           <div className="relative ml-auto flex-1 md:grow-0"></div>
           <ModeToggle onThemeChange={handleThemeChange} />
           <DropdownMenu>
@@ -233,10 +165,7 @@ function Main() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        <div className="flex h-full flex-1 flex-col px-[22px] md:flex pt-3">
-          <Outlet />
-        </div>
+        <Outlet />
       </div>
     </div>
   );

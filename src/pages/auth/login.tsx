@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
-import ddc_connect from "../../../public/new.png";
-import ddc_connect3 from "../../../public/ddc_connect3.png";
+import ddc_connect from "/new.png";
+import ddc_connect3 from "/ddc_connect3.png";
 import {
   Card,
   CardContent,
@@ -59,7 +59,11 @@ function Login() {
           path: "/",
           expires: expirationDate,
         });
-        navigate("/dashboard/bolmanagement");
+        Cookies.set("_authorities", JSON.stringify(response.data.details.authorities), {
+          path: "/",
+          expires: expirationDate,
+        });
+        navigate("/dashboard/");
       }
       setIsLogin(false);
 
@@ -76,8 +80,8 @@ function Login() {
   });
   return (
     <div className="flex justify-center items-center w-full border h-[100vh]">
-      <form onSubmit={login} className="md:w-[25em] w-full p-2">
-        <Card className="w-full max-w-sm">
+      <form onSubmit={login} className="md:w-[25em] w-[80%] p-2">
+        <Card className="w-full">
           <CardHeader>
             <CardTitle className="text-2xl">
               <img

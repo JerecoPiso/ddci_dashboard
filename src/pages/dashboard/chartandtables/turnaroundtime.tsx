@@ -10,7 +10,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Pie, PieChart, LabelList } from "recharts";
@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getProdDate } from "@/variables/dates";
 import { useNavigate } from "react-router-dom";
+import { BaseUrlContext } from "@/App";
 
 import ClientSelector from "@/components/ClientSelector";
 import Cookies from "js-cookie";
@@ -45,6 +46,7 @@ const generateChartData = (
   }));
 };
 function TurnAroundTime() {
+  const baseUrl = useContext(BaseUrlContext);
   const hasFetchedData = useRef(false);
   const navigate = useNavigate();
   const [date, setDate] = useState<Date>();
@@ -126,20 +128,20 @@ function TurnAroundTime() {
         },
         {
           minValue: 601,
-          maxValue: 10000,
+          maxValue: 100000,
         },
       ];
       const values = [
         "0.00-120.00",
         "121.00-300.00",
         "301.00-600.00",
-        "601.00-10000.00",
+        "601.00-100000.00",
       ];
       const _prod_date = getProdDate(date);
       const clientName = client ? client : getDefaultClient();
 
       const elapse = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/elapse/${clientName}/${_prod_date}`,
+        `${baseUrl}document/count-documents-by/elapse/${clientName}/${_prod_date}`,
         JSON.stringify(data),
         {
           headers: {
@@ -155,7 +157,7 @@ function TurnAroundTime() {
         }
       }
       const capturing = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/upload-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/upload-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -165,13 +167,14 @@ function TurnAroundTime() {
         }
       );
       if (capturing.status == 200) {
+        // console.log(capturing.data.details)
         const _capturing = capturing.data.details;
         for (let i = 0; i < values.length; i++) {
           updateElapse(i, "capturing", _capturing[values[i]]);
         }
       }
       const processing = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/ocr-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/ocr-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -187,7 +190,7 @@ function TurnAroundTime() {
         }
       }
       const validation = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/edit-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/edit-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -204,6 +207,7 @@ function TurnAroundTime() {
       }
       hasFetchedData.current = false;
     } catch (err: any) {
+      console.log(err)
       if (err.response.status === 403) {
         Cookies.remove("_clients");
         Cookies.remove("token");
@@ -220,17 +224,20 @@ function TurnAroundTime() {
     return __clients[0];
   };
   useEffect(() => {
-    const __clients = JSON.parse(Cookies.get("_clients") || "");
-    const clientsList: Clients[] = [];
-    __clients.forEach(
-      (el: any) => {
-        clientsList.push(el);
-      },
-    );
-    if(client == ''){
-      setClient(__clients[0])
+    if (Cookies.get("token")) {
+      const __clients = JSON.parse(Cookies.get("_clients") || "");
+      const clientsList: Clients[] = [];
+      __clients.forEach(
+        (el: any) => {
+          clientsList.push(el);
+        },
+      );
+      if(client == ''){
+        setClient(__clients[0])
+      }
+      setClients(clientsList);
     }
-    setClients(clientsList);
+    
     // setClient(__clients[0])
   }, [client]);
   useEffect(() => {

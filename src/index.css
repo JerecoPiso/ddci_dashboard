@@ -90,6 +90,9 @@
     --chart-05: 210, 100%, 75%;
   }
 }
+*{
+  font-family: 'Poppins'
+}
 @layer base {
   * {
     @apply border-border;

@@ -473,8 +473,8 @@ function UserManagement() {
               <DialogDescription />
             </DialogHeader>
             <form onSubmit={updateUser}>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="md:col-span-1 col-span-2">
+              <div className="grid grid-cols-2 gap-2">
+                {/* <div className="md:col-span-1 col-span-2">
                   <Label>Username</Label>
                   <Input
                     type="text"
@@ -484,7 +484,7 @@ function UserManagement() {
                     placeholder="Username"
                     required
                   />
-                </div>
+                </div> */}
                 <div className="md:col-span-1 col-span-2">
                   <Label>Lastname</Label>
                   <Input

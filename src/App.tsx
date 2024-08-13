@@ -11,10 +11,60 @@ import { ThemeProvider } from "@/components/theme-provider";
 import UserManagement from "./pages/dashboard/sidebarlinks/usermanagement";
 import Dashboard from "./pages/dashboard/dashboard";
 import Admin from "./pages/dashboard/admin";
+import { createContext } from "react";
+export const BaseUrlContext = createContext(
+  "http://192.168.23.84:8007/ddcic/api/v1/"
+);
 function App() {
   return (
     <>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <BaseUrlContext.Provider value="http://192.168.23.84:8007/ddcic/api/v1/">
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <BrowserRouter basename="/ddci/">
+            <Routes>
+              <Route path="/" element={<Login />} />
+              <Route path="/dashboard" element={<Main />}>
+                <Route path="" element={<Dashboard />}></Route>
+                <Route index path="bolmanagement" element={<BolManagement />} />
+                <Route path="statistics" element={<Statistics />} />
+                <Route path="accuracy" element={<Accuracy />} />
+                <Route path="currentvolume" element={<CurrentVolume />} />
+                <Route path="turnaroundtime" element={<TurnAroundTime />} />
+                <Route path="" element={<Admin />}>
+                  <Route
+                    index
+                    path="usermanagement"
+                    element={<UserManagement />}
+                  />
+                </Route>
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </ThemeProvider>
+      </BaseUrlContext.Provider>
+      {/* <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <BrowserRouter basename="/ddci/">
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/dashboard" element={<Main />}>
+              <Route path="" element={<Dashboard />}></Route>
+              <Route index path="bolmanagement" element={<BolManagement />} />
+              <Route path="statistics" element={<Statistics />} />
+              <Route path="accuracy" element={<Accuracy />} />
+              <Route path="currentvolume" element={<CurrentVolume />} />
+              <Route path="turnaroundtime" element={<TurnAroundTime />} />
+              <Route path="" element={<Admin />}>
+                <Route
+                  index
+                  path="usermanagement"
+                  element={<UserManagement />}
+                />
+              </Route>
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider> */}
+      {/* <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <BrowserRouter basename="/ddci/">
           <Routes>
             <Route path="/" element={<Login />} />
@@ -36,7 +86,7 @@ function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-      </ThemeProvider>
+      </ThemeProvider> */}
     </>
   );
 }

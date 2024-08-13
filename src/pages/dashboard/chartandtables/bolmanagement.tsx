@@ -6,6 +6,7 @@
 //   SheetTitle,
 //   SheetTrigger,
 // } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Popover,
   PopoverContent,
@@ -18,7 +19,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 // import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { getProdDate } from "@/variables/dates";
@@ -26,7 +27,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Cookies from "js-cookie";
-import { formatDate, convertSeconds } from "@/utils/date";
+import { formatDate, convertSeconds, convertDateTimeString } from "@/utils/date";
 import { Pie, PieChart } from "recharts";
 import { DataTable } from "@/components/datatable/bolmanagement/data-table";
 import { columns } from "@/components/datatable/bolmanagement/columns";
@@ -36,6 +37,8 @@ import { useNavigate } from "react-router-dom";
 import Loading from "@/components/loading";
 import axios from "axios";
 import ClientSelector from "@/components/ClientSelector";
+import { BaseUrlContext } from "@/App";
+
 interface Clients {
   name: string;
 }
@@ -44,6 +47,8 @@ interface DocumentSaveDates {
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BolManagement() {
+  const baseUrl = useContext(BaseUrlContext);
+
   const navigate = useNavigate();
   const ranges = ["_025", "_2650", "_51_75", "_76100"];
   const colors = [
@@ -138,10 +143,15 @@ function BolManagement() {
       setLoading(true);
       const _prod_date = getProdDate(date);
       const clientName = client ? client : getDefaultClient();
+      // const link: string =
+      //   api === "getDocument"
+      //     ? `${baseUrl}document/get/${clientName}/${_prod_date}/${page}/${rowSize}`
+      //     : `${baseUrl}document/get/${clientName}/${_prod_date}/${page}/${rowSize}?status=${status}`;
       const link: string =
         api === "getDocument"
-          ? `http://192.168.23.84:8007/ddcic/api/v1/document/get/${clientName}/${_prod_date}/${page}/${rowSize}`
-          : `http://192.168.23.84:8007/ddcic/api/v1/document/get/${clientName}/${_prod_date}/${status}/${page}/${rowSize}`;
+          ? `${baseUrl}document/get/${clientName}/${_prod_date}?pageNumber=${page}&pageSize=${rowSize}`
+          : `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`
+      // const link = `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`
       const response = await axios.get(link, {
         headers: {
           "Content-Type": "application/json",
@@ -149,15 +159,15 @@ function BolManagement() {
         },
       });
       if (response.status === 200) {
-        // console.log(response.data.details);
         const _bols: BOL[] = [];
+        // console.log(response.data);
         if (response.data.details) {
           setPageCount(response.data.details.pageCount);
           response.data.details.list.forEach((el: any) => {
             let accuracy_total: number = 0;
             let elapse: number = 0;
             const document_save_dates: DocumentSaveDates[] = [];
-            let _turnAroundSeconds: number = 0
+            let _turnAroundSeconds: number = 0;
             if (Object.keys(el.attributes).length > 0) {
               accuracy_total =
                 ((parseFloat(el.attributes["billto-accuracy"]) +
@@ -172,11 +182,16 @@ function BolManagement() {
                 parseFloat(el.attributes["edit-elapse"]) +
                 parseFloat(el.attributes["ocr-elapse"]) +
                 parseFloat(el.attributes["upload-elapse"]);
-              el.processes.forEach((e: any) => {
-                if (e.name === "DOCUMENT_SAVE") {
-                  document_save_dates.push(e.endTime);
-                }
-              });
+            }
+            el.processes.forEach((e: any) => {
+              if (e.name === "DOCUMENT_SAVE") {
+                // console.log(el.createdAt)
+                // console.log(e.endTime)
+                document_save_dates.push(e.endTime);
+              }
+            });
+            if (document_save_dates.length > 0) {
+              // console.log(document_save_dates)
               const dates: Date[] = document_save_dates.map(
                 (dateTime) => new Date(dateTime.toString())
               );
@@ -184,11 +199,13 @@ function BolManagement() {
                 Math.max(...dates.map((date) => date.getTime()))
               );
               const _createdAt = new Date(el.createdAt);
-              const _processEndTime = new Date(maxDate.toISOString().slice(0, 19));
-              _turnAroundSeconds  = _processEndTime.getTime() - _createdAt.getTime();
+  
+              // const _processEndTime = new Date(maxDate.toISOString());
+              const _processEndTime = new Date(convertDateTimeString(maxDate.toString()));
+
+              _turnAroundSeconds =
+                _processEndTime.getTime() - _createdAt.getTime();
             }
-            // const _accuracy: number = accuracy_total;
-            // console.log(`${el.priority}`)
             _bols.push({
               document: el.document,
               client: el.client,
@@ -197,9 +214,12 @@ function BolManagement() {
               status: el.status,
               createdat: formatDate(el.createdAt),
               accuracy: accuracy_total.toFixed(2),
-              elapse: convertSeconds(elapse),
-              turnaroundtime: convertSeconds(_turnAroundSeconds/1000),
-              priority: el.priority > 0 ? 'Yes' : 'No'
+              elapse: elapse > 0 ? convertSeconds(elapse) : "0",
+              turnaroundtime:
+                _turnAroundSeconds > 0
+                  ? convertSeconds(_turnAroundSeconds / 1000)
+                  : "0",
+              priority: el.priority > 0 ? "Yes" : "No",
             });
           });
         } else {
@@ -228,7 +248,7 @@ function BolManagement() {
       ];
       const values = ["0.00-0.25", "0.26-0.50", "0.51-0.75", "0.76-1.00"];
       const shipperAccuracy = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/shipper-accuracy`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/shipper-accuracy`,
 
         JSON.stringify(data),
         {
@@ -245,7 +265,7 @@ function BolManagement() {
         }
       }
       const consigneeAccuracy = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/consignee-accuracy`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/consignee-accuracy`,
 
         JSON.stringify(data),
         {
@@ -263,7 +283,7 @@ function BolManagement() {
         }
       }
       const billtoAccuracy = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/billto-accuracy`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/billto-accuracy`,
 
         JSON.stringify(data),
         {
@@ -281,7 +301,7 @@ function BolManagement() {
         }
       }
       const itemsAccuracy = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/attribute/${clientName}/${_prod_date}/items-accuracy`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/items-accuracy`,
 
         JSON.stringify(data),
         {
@@ -299,7 +319,7 @@ function BolManagement() {
         }
       }
       const overallAccuracy = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
+        `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
 
         JSON.stringify(data),
         {
@@ -318,6 +338,7 @@ function BolManagement() {
       hasFetchedData.current = false;
       setLoading(false);
     } catch (err: any) {
+      // console.log(err);
       if (err.response.status === 403) {
         Cookies.remove("_clients");
         Cookies.remove("token");
@@ -365,15 +386,18 @@ function BolManagement() {
   //   });
   // }
   useEffect(() => {
-    const __clients = JSON.parse(Cookies.get("_clients") || "");
-    const clientsList: Clients[] = [];
-    __clients.forEach((el: any) => {
-      clientsList.push(el);
-    });
-    setClients(clientsList);
-    if (client == "") {
-      setClient(__clients[0]);
+    if (Cookies.get("token")) {
+      const __clients = JSON.parse(Cookies.get("_clients") || "");
+      const clientsList: Clients[] = [];
+      __clients.forEach((el: any) => {
+        clientsList.push(el);
+      });
+      setClients(clientsList);
+      if (client == "") {
+        setClient(__clients[0]);
+      }
     }
+   
     // setClient(__clients[0 ])
   }, [client]);
   useEffect(() => {
@@ -390,10 +414,10 @@ function BolManagement() {
     production: item.production,
     status: item.status,
     createdat: item.createdat,
-    accuracy: item.accuracy,
+    accuracy: item.accuracy && item.accuracy != "NaN" ? item.accuracy : "0.00",
     elapse: item.elapse,
     turnaroundtime: item.turnaroundtime,
-    priority: item.priority
+    priority: item.priority,
   }));
   return (
     <Card x-chunk="dashboard-06-chunk-0">
@@ -440,65 +464,46 @@ function BolManagement() {
         ) : (
           ""
         )}
-        <Card className="flex flex-col">
-          <CardContent className="flex-1 p-4">
-            <div className="grid grid-cols-12 gap-x-2">
-              <div className="lg:col-span-1 md:col-span-2 col-span-12">
-                <p className=" text-black/80 font-medium dark:text-muted-foreground">
-                  Legend
-                </p>
-                <div className="flex items-center text-sm gap-x-2 mt-2">
-                  <p className="bg-[hsl(var(--chart-04))] text-[hsl(var(--chart-04))] min-w-5 min-h-5"></p>
-                  0-25%
-                </div>
-                <div className="flex items-center text-sm gap-x-2 mt-2">
-                  <p className="bg-[hsl(var(--chart-03))] text-[hsl(var(--chart-03))] min-w-5 min-h-5"></p>
-                  26-50%
-                </div>
-                <div className="flex items-center text-sm gap-x-2 mt-2">
-                  <p className="bg-[hsl(var(--chart-02))] text-[hsl(var(--chart-02))] min-w-5 min-h-5"></p>
-                  51-75%
-                </div>
-                <div className="flex items-center text-sm gap-x-2 mt-2">
-                  <p className="bg-[hsl(var(--chart-01))] text-[hsl(var(--chart-01))] min-w-5 min-h-5"></p>
-                  76-100%
-                </div>
-              </div>
-              <div className="lg:col-span-11 md:col-span-10 col-span-12">
-                <div className="grid grid-cols-12">
-                  <div className="flex justify-center items-center lg:col-span-4 md:col-span-5 col-span-12">
-                    <div className=" w-full">
-                      <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
-                        Overall Accuracy
-                      </p>
-                      <ChartContainer
-                        config={accuracyChartConfig}
-                        className="max-h-[700px]"
-                      >
-                        <PieChart>
-                          <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
-                          />
-                          <Pie
-                            data={accuracyChartData}
-                            dataKey="accuracy_count"
-                            nameKey="accuracy_range"
-                          />
-                        </PieChart>
-                      </ChartContainer>
+        <Tabs defaultValue="accuracies">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="accuracies">Accuracies</TabsTrigger>
+            <TabsTrigger value="table">Table</TabsTrigger>
+          </TabsList>
+          <TabsContent value="accuracies">
+            <Card className="flex flex-col">
+              <CardContent className="flex-1 p-4">
+                <div className="grid grid-cols-12 gap-x-2">
+                  <div className="lg:col-span-1 md:col-span-2 col-span-12">
+                    <p className=" text-black/80 font-medium dark:text-muted-foreground">
+                      Legend
+                    </p>
+                    <div className="flex items-center text-sm gap-x-2 mt-2">
+                      <p className="bg-[hsl(var(--chart-04))] text-[hsl(var(--chart-04))] min-w-5 min-h-5"></p>
+                      0-25%
+                    </div>
+                    <div className="flex items-center text-sm gap-x-2 mt-2">
+                      <p className="bg-[hsl(var(--chart-03))] text-[hsl(var(--chart-03))] min-w-5 min-h-5"></p>
+                      26-50%
+                    </div>
+                    <div className="flex items-center text-sm gap-x-2 mt-2">
+                      <p className="bg-[hsl(var(--chart-02))] text-[hsl(var(--chart-02))] min-w-5 min-h-5"></p>
+                      51-75%
+                    </div>
+                    <div className="flex items-center text-sm gap-x-2 mt-2">
+                      <p className="bg-[hsl(var(--chart-01))] text-[hsl(var(--chart-01))] min-w-5 min-h-5"></p>
+                      76-100%
                     </div>
                   </div>
-                  <div className="lg:col-span-8 md:col-span-7 col-span-12">
-                    <div className="grid grid-cols-2">
-                      <div className="md:col-span-1 col-span-2">
-                        <div className="lg:col-span-1 md:col-span-2 col-span-6">
+                  <div className="lg:col-span-11 md:col-span-10 col-span-12">
+                    <div className="grid grid-cols-12">
+                      <div className="flex justify-center items-center lg:col-span-4 md:col-span-5 col-span-12">
+                        <div className=" w-full">
                           <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
-                            Shipper Accuracy
+                            Overall Accuracy
                           </p>
                           <ChartContainer
                             config={accuracyChartConfig}
-                            className="max-h-[300px]"
+                            className="max-h-[700px]"
                           >
                             <PieChart>
                               <ChartTooltip
@@ -506,7 +511,7 @@ function BolManagement() {
                                 content={<ChartTooltipContent hideLabel />}
                               />
                               <Pie
-                                data={shipperAccuracyChartData}
+                                data={accuracyChartData}
                                 dataKey="accuracy_count"
                                 nameKey="accuracy_range"
                               />
@@ -514,96 +519,129 @@ function BolManagement() {
                           </ChartContainer>
                         </div>
                       </div>
-                      <div className="md:col-span-1 col-span-2">
-                        {" "}
-                        <div className="lg:col-span-1 md:col-span-2 col-span-6">
-                          <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
-                            Consignee Accuracy
-                          </p>
-                          <ChartContainer
-                            config={accuracyChartConfig}
-                            className="max-h-[300px]"
-                          >
-                            <PieChart>
-                              <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent hideLabel />}
-                              />
-                              <Pie
-                                data={consigneeAccuracyChartData}
-                                dataKey="accuracy_count"
-                                nameKey="accuracy_range"
-                              />
-                            </PieChart>
-                          </ChartContainer>
-                        </div>
-                      </div>
-                      <div className="md:col-span-1 col-span-2">
-                        {" "}
-                        <div className="lg:col-span-1 md:col-span-2 col-span-6">
-                          <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
-                            Bill To Accuracy
-                          </p>
-                          <ChartContainer
-                            config={accuracyChartConfig}
-                            className="max-h-[300px]"
-                          >
-                            <PieChart>
-                              <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent hideLabel />}
-                              />
-                              <Pie
-                                data={billtoAccuracyChartData}
-                                dataKey="accuracy_count"
-                                nameKey="accuracy_range"
-                              />
-                            </PieChart>
-                          </ChartContainer>
-                        </div>
-                      </div>
-                      <div className="md:col-span-1 col-span-2">
-                        {" "}
-                        <div className="lg:col-span-1 md:col-span-2 col-span-6">
-                          <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
-                            Items Accuracy
-                          </p>
-                          <ChartContainer
-                            config={accuracyChartConfig}
-                            className="max-h-[300px] w-full"
-                          >
-                            <PieChart>
-                              <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent hideLabel />}
-                              />
-                              <Pie
-                                data={itemsAccuracyChartData}
-                                dataKey="accuracy_count"
-                                nameKey="accuracy_range"
-                              />
-                            </PieChart>
-                          </ChartContainer>
+                      <div className="lg:col-span-8 md:col-span-7 col-span-12">
+                        <div className="grid grid-cols-2">
+                          <div className="md:col-span-1 col-span-2">
+                            <div className="lg:col-span-1 md:col-span-2 col-span-6">
+                              <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
+                                Shipper Accuracy
+                              </p>
+                              <ChartContainer
+                                config={accuracyChartConfig}
+                                className="max-h-[300px]"
+                              >
+                                <PieChart>
+                                  <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                    data={shipperAccuracyChartData}
+                                    dataKey="accuracy_count"
+                                    nameKey="accuracy_range"
+                                  />
+                                </PieChart>
+                              </ChartContainer>
+                            </div>
+                          </div>
+                          <div className="md:col-span-1 col-span-2">
+                            {" "}
+                            <div className="lg:col-span-1 md:col-span-2 col-span-6">
+                              <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
+                                Consignee Accuracy
+                              </p>
+                              <ChartContainer
+                                config={accuracyChartConfig}
+                                className="max-h-[300px]"
+                              >
+                                <PieChart>
+                                  <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                    data={consigneeAccuracyChartData}
+                                    dataKey="accuracy_count"
+                                    nameKey="accuracy_range"
+                                  />
+                                </PieChart>
+                              </ChartContainer>
+                            </div>
+                          </div>
+                          <div className="md:col-span-1 col-span-2">
+                            {" "}
+                            <div className="lg:col-span-1 md:col-span-2 col-span-6">
+                              <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
+                                Bill To Accuracy
+                              </p>
+                              <ChartContainer
+                                config={accuracyChartConfig}
+                                className="max-h-[300px]"
+                              >
+                                <PieChart>
+                                  <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                    data={billtoAccuracyChartData}
+                                    dataKey="accuracy_count"
+                                    nameKey="accuracy_range"
+                                  />
+                                </PieChart>
+                              </ChartContainer>
+                            </div>
+                          </div>
+                          <div className="md:col-span-1 col-span-2">
+                            {" "}
+                            <div className="lg:col-span-1 md:col-span-2 col-span-6">
+                              <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
+                                Items Accuracy
+                              </p>
+                              <ChartContainer
+                                config={accuracyChartConfig}
+                                className="max-h-[300px] w-full"
+                              >
+                                <PieChart>
+                                  <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                    data={itemsAccuracyChartData}
+                                    dataKey="accuracy_count"
+                                    nameKey="accuracy_range"
+                                  />
+                                </PieChart>
+                              </ChartContainer>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="overflow-auto max-w-[100%]">
-              <DataTable
-                data={data}
-                columns={columns}
-                filterChange={filterChange}
-                changePage={changePage}
-                pageCount={pageCount}
-                pageNumber={page}
-                onFilterStatus={onFilterStatus}
-              />
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="table">
+            <Card className="flex flex-col">
+              <CardContent className="flex-1 p-4">
+                <div className="overflow-auto max-w-[100%]">
+                  <DataTable
+                    data={data}
+                    columns={columns}
+                    filterChange={filterChange}
+                    changePage={changePage}
+                    pageCount={pageCount}
+                    pageNumber={page}
+                    onFilterStatus={onFilterStatus}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

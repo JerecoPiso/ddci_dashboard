@@ -18,13 +18,14 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, LabelList } from "recharts";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getProdDate } from "@/variables/dates";
 import { useNavigate } from "react-router-dom";
+import { BaseUrlContext } from "@/App";
 import ClientSelector from "@/components/ClientSelector";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -32,6 +33,8 @@ interface Clients {
   name: string;
 }
 function CurrentVolume() {
+  const baseUrl = useContext(BaseUrlContext);
+
   const navigate = useNavigate();
   const hasFetchedData = useRef(false);
   const [date, setDate] = useState<Date>();
@@ -54,7 +57,7 @@ function CurrentVolume() {
       const clientName = client ? client : getDefaultClient();
 
       const response = await axios.post(
-        `http://192.168.23.84:8007/ddcic/api/v1/document/count-documents-by/count/${clientName}/${_prod_date}`,
+        `${baseUrl}document/count-documents-by/count/${clientName}/${_prod_date}`,
         [],
         {
           headers: {
@@ -93,15 +96,18 @@ function CurrentVolume() {
     return __clients[0];
   };
   useEffect(() => {
-    const __clients = JSON.parse(Cookies.get("_clients") || "");
-    const clientsList: Clients[] = [];
-    __clients.forEach((el: any) => {
-      clientsList.push(el);
-    });
-    setClients(clientsList);
-    if (client == "") {
-      setClient(__clients[0]);
+    if (Cookies.get("token")) {
+      const __clients = JSON.parse(Cookies.get("_clients") || "");
+      const clientsList: Clients[] = [];
+      __clients.forEach((el: any) => {
+        clientsList.push(el);
+      });
+      setClients(clientsList);
+      if (client == "") {
+        setClient(__clients[0]);
+      }
     }
+
     // setClient(__clients[0])
   }, [client]);
   useEffect(() => {

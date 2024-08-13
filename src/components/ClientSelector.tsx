@@ -32,17 +32,20 @@ function ClientSelector({ onClientChange, activeClient }: Clients) {
     setClient(activeClient);
   }, [activeClient]);
   useEffect(() => {
-    const __clients = JSON.parse(Cookies.get("_clients") || "");
-    const clientsList: Clients[] = [];
-    __clients.forEach((el: any) => {
-      clientsList.push(el);
-    });
-    setClients(clientsList);
+    if (Cookies.get("token")) {
+      const __clients = JSON.parse(Cookies.get("_clients") || "");
+      const clientsList: Clients[] = [];
+      __clients.forEach((el: any) => {
+        clientsList.push(el);
+      });
+      setClients(clientsList);
+    }
+  
   }, []);
   return (
     <>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className="bg-red-800 text-base text-white dark:bg-slate-700 pb-2 pt-[5px] px-3 rounded-sm">
+        <SheetTrigger className="bg-red-800 text-sm text-white dark:bg-slate-700 pb-2 pt-[8px] px-3 rounded-sm">
           Change Client
         </SheetTrigger>
         <SheetContent>
