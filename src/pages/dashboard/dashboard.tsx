@@ -31,14 +31,15 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
-  Area,
-  AreaChart,
+  // Area,
+  // AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
+  // CartesianGrid,
   LabelList,
-  Line,
-  LineChart,
+  // Line,
+  // LineChart,
   Pie,
   PieChart,
   PolarAngleAxis,
@@ -49,9 +50,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
 import { getProdDate, getPreviousDate } from "@/variables/dates";
-
 import { Separator } from "@/components/ui/separator";
 import ClientSelector from "@/components/ClientSelector";
 import Cookies from "js-cookie";
@@ -65,7 +64,7 @@ import { AccuracyData, generateAccuracyData } from "@/variables/bol";
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger,
+  // CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
 import {
@@ -76,7 +75,8 @@ import {
   colors,
   countComparer,
 } from "@/variables/dashboard";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+// import DailyBilled from "@/components/charts/dailybilled";
+// import { CaretSortIcon } from "@radix-ui/react-icons";
 function Dashboard() {
   const headers = {
     headers: {
@@ -166,11 +166,11 @@ function Dashboard() {
     const _previous_date = getPreviousDate(_prod_date);
     const clientName = client ? client : getDefaultClient();
     const response = await axios.get(
-      `${baseUrl}document/dashboard/hourly-arrival/TEST04/${_prod_date}`,
+      `${baseUrl}document/dashboard/hourly-arrival/${clientName}/${_prod_date}`,
       headers
     );
     const yesterday = await axios.get(
-      `${baseUrl}document/dashboard/hourly-arrival/TEST04/${_previous_date}`,
+      `${baseUrl}document/dashboard/hourly-arrival/${clientName}/${_previous_date}`,
       headers
     );
     const _hourly: HourlyArrival[] = [];
@@ -202,12 +202,12 @@ function Dashboard() {
     const _previous_date = getPreviousDate(_prod_date);
     const clientName = client ? client : getDefaultClient();
     const response = await axios.post(
-      `${baseUrl}document/count-documents-by/count/TEST04/${_prod_date}`,
+      `${baseUrl}document/count-documents-by/count/${clientName}/${_prod_date}`,
       [],
       headers
     );
     const yesterday = await axios.post(
-      `${baseUrl}document/count-documents-by/count/TEST04/${_previous_date}`,
+      `${baseUrl}document/count-documents-by/count/${clientName}/${_previous_date}`,
       [],
       headers
     );
@@ -314,7 +314,7 @@ function Dashboard() {
     ];
     const values = ["0.00-0.25", "0.26-0.50", "0.51-0.75", "0.76-1.00"];
     const shipperAccuracy = await axios.post(
-      `${baseUrl}document/count-documents-by/attribute/TEST04/${_prod_date}/shipper-accuracy`,
+      `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/shipper-accuracy`,
       JSON.stringify(data),
       headers
     );
@@ -325,7 +325,7 @@ function Dashboard() {
       }
     }
     const consigneeAccuracy = await axios.post(
-      `${baseUrl}document/count-documents-by/attribute/TEST04/${_prod_date}/consignee-accuracy`,
+      `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/consignee-accuracy`,
       JSON.stringify(data),
       headers
     );
@@ -337,7 +337,7 @@ function Dashboard() {
       }
     }
     const billtoAccuracy = await axios.post(
-      `${baseUrl}document/count-documents-by/attribute/TEST04/${_prod_date}/billto-accuracy`,
+      `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/billto-accuracy`,
       JSON.stringify(data),
       headers
     );
@@ -349,7 +349,7 @@ function Dashboard() {
       }
     }
     const itemsAccuracy = await axios.post(
-      `${baseUrl}document/count-documents-by/attribute/TEST04/${_prod_date}/items-accuracy`,
+      `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/items-accuracy`,
       JSON.stringify(data),
       headers
     );
@@ -361,7 +361,7 @@ function Dashboard() {
       }
     }
     const overallAccuracy = await axios.post(
-      `${baseUrl}document/count-documents-by/accuracy/TEST04/${_prod_date}`,
+      `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
       JSON.stringify(data),
       headers
     );
@@ -373,7 +373,7 @@ function Dashboard() {
     }
   };
   useEffect(() => {
-    if (!Cookies.get("token")) {
+    if (Cookies.get("token")) {
       const __clients = JSON.parse(Cookies.get("_clients") || "");
       const clientsList: Clients[] = [];
       __clients.forEach((el: any) => {
@@ -404,14 +404,15 @@ function Dashboard() {
       ) : (
         ""
       )}
-      <div className="fixed right-5 bottom-5 dark:bg-slate-800 p-2 rounded-md z-50">
+      <div className="fixed right-5 bottom-5 dark:bg-slate-800 p-2 rounded-md z-50 dark:border-none
+      ">
         <div className="flex items-center gap-x-1">
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant={"outline"}
                 className={cn(
-                  "w-[220px] justify-start text-left font-normal",
+                  "w-[220px] justify-start text-left font-normal border border-red-800 dark:border-none",
                   !date && "text-muted-foreground"
                 )}
               >
@@ -425,6 +426,7 @@ function Dashboard() {
                 selected={date}
                 onSelect={setDate}
                 initialFocus
+              
               />
             </PopoverContent>
           </Popover>
@@ -511,12 +513,13 @@ function Dashboard() {
                 >
                   <BarChart
                     accessibilityLayer
-                    // margin={{
-                    //   left: -4,
-                    //   right: -4,
-                    // }}
+                    margin={{
+                      left: -4,
+                      right: -4,
+                    }}
                     data={hourlyArrival}
                   >
+                      <CartesianGrid vertical={false} />
                     <Bar
                       dataKey="count"
                       fill="var(--color-steps)"
@@ -548,6 +551,7 @@ function Dashboard() {
               </CardDescription> */}
             </CardFooter>
           </Card>
+          {/* <DailyBilled  /> */}
         </div>
         <div className="md:col-span-4 col-span-12 flex flex-col gap-4">
           <Card x-chunk="charts-01-chunk-4">

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useState, useRef, ChangeEvent } from "react";
+import { useEffect, useState, useRef, ChangeEvent, useContext } from "react";
 import { DataTable } from "@/components/datatable/usermanagement/data-table";
 import { columns } from "@/components/datatable/usermanagement/columns";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/dialog";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { BaseUrlContext } from "@/App";
+
 interface Users {
   id?: number;
   lastname: string;
@@ -39,6 +41,8 @@ interface Users {
   suffix?: string;
 }
 function UserManagement() {
+  const baseUrl = useContext(BaseUrlContext);
+
   const hasFetchedData = useRef(false);
   const roles = [
     "ROLE_ADMIN",
@@ -66,7 +70,7 @@ function UserManagement() {
   const getUsers = async () => {
     hasFetchedData.current = true;
     const response = await axios.get(
-      "http://192.168.23.84:8007/ddcic/api/v1/credential/list",
+      `${baseUrl}credential/list`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -82,7 +86,7 @@ function UserManagement() {
   const getClients = async () => {
     hasFetchedData.current = true;
     const response = await axios.get(
-      "http://192.168.23.84:8007/ddcic/api/v1/client/get-active",
+      `${baseUrl}client/get-active`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -96,25 +100,25 @@ function UserManagement() {
   };
   const deleteUser = async () => {
     hasFetchedData.current = true;
-    alert(userinfo.username);
-    // try {
-    //   const response = await axios.post(
-    //     `http://192.168.23.84:8007/ddcic/api/v1/credential/archive/${userinfo.id}/${userinfo.username}`,
-    //     [],
-    //     {
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: `Bearer ${Cookies.get("token")}`,
-    //       },
-    //     }
-    //   );
-    //   if (response.status === 200) {
-    //     ToastSuccess(response.data.message);
-    //     getUsers();
-    //   }
-    // } catch (err: any) {
-    //   ToastError(JSON.stringify(err.response.data.details));
-    // }
+    // alert(userinfo.username);
+    try {
+      const response = await axios.post(
+        `${baseUrl}credential/archive/${userinfo.id}/${userinfo.username}`,
+        [],
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        ToastSuccess(response.data.message);
+        getUsers();
+      }
+    } catch (err: any) {
+      ToastError(JSON.stringify(err.response.data.details));
+    }
   };
   const handleDelete = (id: any, username: any) => {
     setUserinfo((prevUserinfo) => ({
@@ -131,7 +135,7 @@ function UserManagement() {
     const newUserinfo: Users = { ...userinfo };
 
     if (Object.keys(values).length > 0) {
-      console.log(values);
+      // console.log(values);
       (newUserinfo.id = values.id), (newUserinfo.username = values.username);
       newUserinfo.lastname = values.lastname;
       newUserinfo.middlename = values.middlename;
@@ -229,7 +233,7 @@ function UserManagement() {
       };
       try {
         const response = await axios.post(
-          "http://192.168.23.84:8007/ddcic/api/v1/credential/create",
+          `${baseUrl}credential/create`,
           data,
           {
             headers: {
@@ -278,7 +282,7 @@ function UserManagement() {
       };
       try {
         const response = await axios.post(
-          "http://192.168.23.84:8007/ddcic/api/v1/credential/update",
+          `${baseUrl}credential/update`,
           data,
           {
             headers: {
@@ -322,6 +326,7 @@ function UserManagement() {
       getUsers();
       getClients();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [users]);
   return (
     <div>

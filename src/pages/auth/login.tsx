@@ -54,14 +54,20 @@ function Login() {
         Cookies.set("token", response.data.details.token, {
           path: "/",
           expires: expirationDate,
+          secure: false,
+          sameSite: 'lax'
         });
         Cookies.set("_clients", JSON.stringify(response.data.details.clients), {
           path: "/",
           expires: expirationDate,
+          secure: false,
+            sameSite: 'lax'
         });
         Cookies.set("_authorities", JSON.stringify(response.data.details.authorities), {
           path: "/",
           expires: expirationDate,
+          secure: false,
+            sameSite: 'lax'
         });
         navigate("/dashboard/");
       }
