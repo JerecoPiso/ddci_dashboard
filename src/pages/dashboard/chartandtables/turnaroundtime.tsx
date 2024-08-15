@@ -156,7 +156,7 @@ function TurnAroundTime() {
         }
       }
       const capturing = await axios.post(
-        `${baseUrl}document/count-documents-by/attribute/TEST04/2024-08-13/upload-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/upload-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -173,7 +173,7 @@ function TurnAroundTime() {
         }
       }
       const processing = await axios.post(
-        `${baseUrl}document/count-documents-by/attribute/TEST04/2024-08-13/ocr-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/ocr-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -189,7 +189,7 @@ function TurnAroundTime() {
         }
       }
       const validation = await axios.post(
-        `${baseUrl}document/count-documents-by/attribute/TEST04/2024-08-13/edit-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/edit-elapse`,
         JSON.stringify(data),
         {
           headers: {
