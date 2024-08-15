@@ -13,12 +13,17 @@ import {
 import Cookies from "js-cookie";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import { User } from "@/variables/user";
 import axios from "axios";
+import { toast } from "sonner";
 import Loading from "@/components/loading";
+import { BaseUrlContext } from "@/App";
 import { useNavigate } from "react-router-dom";
+import { TriangleAlert } from "lucide-react";
 function Login() {
+  const baseUrl = useContext(BaseUrlContext);
+
   const navigate = useNavigate();
   const hasLoad = useRef(false);
   const [islogin, setIsLogin] = useState<boolean>(false);
@@ -42,7 +47,7 @@ function Login() {
     setIsLogin(true);
     try {
       const response = await axios.post(
-        "http://192.168.23.84:8007/ddcic/api/v1/credential/login",
+        `${baseUrl}credential/login`,
         user
       );
       if (response.status == 200) {
@@ -74,7 +79,16 @@ function Login() {
       setIsLogin(false);
 
     } catch (err: any) {
-      alert(err.response.data.message);
+    
+      toast("Error!", {
+        style: { color: "red", backgroundColor: "#ffeae4" },
+        className: "my-classname",
+        description: 'Please check your credentials / or the connection',
+        duration: 3000,
+        icon: <TriangleAlert className="w-5 h-5" />,
+        closeButton: false,
+      });
+      // console.log(err.response.data.details);
       setIsLogin(false);
     }
   };

@@ -7,8 +7,8 @@ export interface Counts {
   receives: number;
   accuracy: number;
   error: number;
-  uploaded: 0;
-  ocred: 0;
+  uploaded: number;
+  ocred: number;
 }
 export interface HourlyArrival {
   time: string;

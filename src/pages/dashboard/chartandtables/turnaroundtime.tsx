@@ -112,7 +112,6 @@ function TurnAroundTime() {
   };
   const getElapseTime = async () => {
     try {
-   
       const data = [
         {
           minValue: 0,
@@ -157,7 +156,7 @@ function TurnAroundTime() {
         }
       }
       const capturing = await axios.post(
-        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/upload-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/TEST04/2024-08-13/upload-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -174,7 +173,7 @@ function TurnAroundTime() {
         }
       }
       const processing = await axios.post(
-        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/ocr-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/TEST04/2024-08-13/ocr-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -190,7 +189,7 @@ function TurnAroundTime() {
         }
       }
       const validation = await axios.post(
-        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/edit-elapse`,
+        `${baseUrl}document/count-documents-by/attribute/TEST04/2024-08-13/edit-elapse`,
         JSON.stringify(data),
         {
           headers: {
@@ -207,7 +206,7 @@ function TurnAroundTime() {
       }
       hasFetchedData.current = false;
     } catch (err: any) {
-      console.log(err)
+      console.log(err);
       if (err.response.status === 403) {
         Cookies.remove("_clients");
         Cookies.remove("token");
@@ -227,17 +226,15 @@ function TurnAroundTime() {
     if (Cookies.get("token")) {
       const __clients = JSON.parse(Cookies.get("_clients") || "");
       const clientsList: Clients[] = [];
-      __clients.forEach(
-        (el: any) => {
-          clientsList.push(el);
-        },
-      );
-      if(client == ''){
-        setClient(__clients[0])
+      __clients.forEach((el: any) => {
+        clientsList.push(el);
+      });
+      if (client == "") {
+        setClient(__clients[0]);
       }
       setClients(clientsList);
     }
-    
+
     // setClient(__clients[0])
   }, [client]);
   useEffect(() => {
@@ -252,7 +249,7 @@ function TurnAroundTime() {
     <Card x-chunk="dashboard-06-chunk-0">
       <CardHeader>
         <CardTitle>
-        <div className="flex md:flex-row flex-col md:justify-between justify-normal md:items-center items-start gap-2">
+          <div className="flex md:flex-row flex-col md:justify-between justify-normal md:items-center items-start gap-2">
             <p>Turn Arround Time</p>
             <div className="flex items-center gap-x-1">
               <Popover>
@@ -277,7 +274,10 @@ function TurnAroundTime() {
                   />
                 </PopoverContent>
               </Popover>
-              <ClientSelector onClientChange={handleClient} activeClient={client} />
+              <ClientSelector
+                onClientChange={handleClient}
+                activeClient={client}
+              />
             </div>
           </div>
         </CardTitle>
@@ -338,6 +338,13 @@ function TurnAroundTime() {
                             stroke="none"
                             fontWeight="bold"
                             fontSize={14}
+                            formatter={(value: any) => {
+                              if (value > 0) {
+                                return value;
+                              } else {
+                                return "";
+                              }
+                            }}
                           />
                         </Pie>
                       </PieChart>
@@ -369,7 +376,21 @@ function TurnAroundTime() {
                             stroke="none"
                             fontWeight="bold"
                             fontSize={14}
+                            formatter={(value: any) => {
+                              if (value > 0) {
+                                return value;
+                              } else {
+                                return "";
+                              }
+                            }}
                           />
+                          {/* <LabelList
+                            dataKey="count"
+                            className="fill-background"
+                            stroke="none"
+                            fontWeight="bold"
+                            fontSize={14}
+                          /> */}
                         </Pie>
                       </PieChart>
                     </ChartContainer>
@@ -400,6 +421,13 @@ function TurnAroundTime() {
                             stroke="none"
                             fontWeight="bold"
                             fontSize={14}
+                            formatter={(value: any) => {
+                              if (value > 0) {
+                                return value;
+                              } else {
+                                return "";
+                              }
+                            }}
                           />
                         </Pie>
                       </PieChart>
@@ -411,7 +439,7 @@ function TurnAroundTime() {
                     </p>
                     <ChartContainer
                       config={chartConfig}
-                      className="mx-auto aspect-square max-h-[550px] "
+                      className="mx-auto aspect-square max-h-[550px]  dark:text-primary"
                     >
                       <PieChart className="w-[40em]">
                         <ChartTooltip
@@ -427,10 +455,17 @@ function TurnAroundTime() {
                         >
                           <LabelList
                             dataKey="count"
-                            className="fill-background "
+                            className="fill-background dark:text-primary"
                             stroke="normal"
                             fontWeight="bold"
                             fontSize={14}
+                            formatter={(value: any) => {
+                              if (value > 0) {
+                                return value;
+                              } else {
+                                return "";
+                              }
+                            }}
                           />
                         </Pie>
                       </PieChart>

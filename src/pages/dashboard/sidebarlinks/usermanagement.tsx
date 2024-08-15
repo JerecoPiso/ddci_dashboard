@@ -420,7 +420,7 @@ function UserManagement() {
                 <div className="md:col-span-1 col-span-2">
                   <Label>Password</Label>
                   <Input
-                    type="text"
+                    type="password"
                     value={userinfo.password}
                     name="password"
                     onChange={handleChange}

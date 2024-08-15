@@ -75,7 +75,7 @@ import {
   colors,
   countComparer,
 } from "@/variables/dashboard";
-// import DailyBilled from "@/components/charts/dailybilled";
+import DailyBilled from "@/components/charts/dailybilled";
 // import { CaretSortIcon } from "@radix-ui/react-icons";
 function Dashboard() {
   const headers = {
@@ -111,6 +111,47 @@ function Dashboard() {
   const [itemsAccuracyChartData, setItemsAccuracyChartData] = useState<
     AccuracyData[]
   >(() => generateAccuracyData(ranges, colors));
+  const [instrustionsAccuracyChartData, setInstrustionsAccuracyChartData] =
+    useState<AccuracyData[]>(() => generateAccuracyData(ranges, colors));
+    const updateAccuracy = (index: number, type: string, total: number) => {
+      if (type === "accuracy") {
+        setAccuracyChartData((prevChartData) =>
+          prevChartData.map((data, i) =>
+            i === index ? { ...data, accuracy_count: total } : data
+          )
+        );
+      } else if (type === "shipper") {
+        setShipperAccuracyChartData((prevChartData) =>
+          prevChartData.map((data, i) =>
+            i === index ? { ...data, accuracy_count: total } : data
+          )
+        );
+      } else if (type === "consignee") {
+        setConsigneeAccuracyChartData((prevChartData) =>
+          prevChartData.map((data, i) =>
+            i === index ? { ...data, accuracy_count: total } : data
+          )
+        );
+      } else if (type === "billto") {
+        setBilltoAccuracyChartData((prevChartData) =>
+          prevChartData.map((data, i) =>
+            i === index ? { ...data, accuracy_count: total } : data
+          )
+        );
+      } else if (type === "items") {
+        setItemsAccuracyChartData((prevChartData) =>
+          prevChartData.map((data, i) =>
+            i === index ? { ...data, accuracy_count: total } : data
+          )
+        );
+      }else if (type === "instructions") {
+        setInstrustionsAccuracyChartData((prevChartData) =>
+          prevChartData.map((data, i) =>
+            i === index ? { ...data, accuracy_count: total } : data
+          )
+        );
+      }
+    };
   const accuracyChartConfig = {
     visitors: {
       label: "Counts",
@@ -258,39 +299,7 @@ function Dashboard() {
     }
     hasFetched.current = false;
   };
-  const updateAccuracy = (index: number, type: string, total: number) => {
-    if (type === "accuracy") {
-      setAccuracyChartData((prevChartData) =>
-        prevChartData.map((data, i) =>
-          i === index ? { ...data, accuracy_count: total } : data
-        )
-      );
-    } else if (type === "shipper") {
-      setShipperAccuracyChartData((prevChartData) =>
-        prevChartData.map((data, i) =>
-          i === index ? { ...data, accuracy_count: total } : data
-        )
-      );
-    } else if (type === "consignee") {
-      setConsigneeAccuracyChartData((prevChartData) =>
-        prevChartData.map((data, i) =>
-          i === index ? { ...data, accuracy_count: total } : data
-        )
-      );
-    } else if (type === "billto") {
-      setBilltoAccuracyChartData((prevChartData) =>
-        prevChartData.map((data, i) =>
-          i === index ? { ...data, accuracy_count: total } : data
-        )
-      );
-    } else if (type === "items") {
-      setItemsAccuracyChartData((prevChartData) =>
-        prevChartData.map((data, i) =>
-          i === index ? { ...data, accuracy_count: total } : data
-        )
-      );
-    }
-  };
+ 
   const getBOL = async () => {
     const _prod_date = getProdDate(date);
     const clientName = client ? client : getDefaultClient();
@@ -330,7 +339,7 @@ function Dashboard() {
       headers
     );
     if (consigneeAccuracy.status == 200) {
-      const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
+      // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
       const _consignee_accuracy = consigneeAccuracy.data.details;
       for (let i = 0; i < values.length; i++) {
         updateAccuracy(i, "consignee", _consignee_accuracy[values[i]]);
@@ -342,7 +351,7 @@ function Dashboard() {
       headers
     );
     if (billtoAccuracy.status == 200) {
-      const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
+      // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
       const _billto_accuracy = billtoAccuracy.data.details;
       for (let i = 0; i < values.length; i++) {
         updateAccuracy(i, "billto", _billto_accuracy[values[i]]);
@@ -354,12 +363,33 @@ function Dashboard() {
       headers
     );
     if (itemsAccuracy.status == 200) {
-      const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
+      // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
       const _items_accuracy = itemsAccuracy.data.details;
       for (let i = 0; i < values.length; i++) {
         updateAccuracy(i, "items", _items_accuracy[values[i]]);
       }
     }
+
+    // try
+    const instructionsAccuracy = await axios.post(
+      `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/instructions-lines-accuracy`,
+
+      JSON.stringify(data),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      }
+    );
+    if (instructionsAccuracy.status == 200) {
+      const _instructions_accuracy = instructionsAccuracy.data.details;
+      for (let i = 0; i < values.length; i++) {
+        updateAccuracy(i, "instructions", _instructions_accuracy[values[i]]);
+      }
+    }
+    
+    // end try
     const overallAccuracy = await axios.post(
       `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
       JSON.stringify(data),
@@ -404,8 +434,10 @@ function Dashboard() {
       ) : (
         ""
       )}
-      <div className="fixed right-5 bottom-5 dark:bg-slate-800 p-2 rounded-md z-50 dark:border-none
-      ">
+      <div
+        className="fixed right-5 bottom-5 dark:bg-slate-800 p-2 rounded-md z-50 dark:border-none
+      "
+      >
         <div className="flex items-center gap-x-1">
           <Popover>
             <PopoverTrigger asChild>
@@ -426,7 +458,6 @@ function Dashboard() {
                 selected={date}
                 onSelect={setDate}
                 initialFocus
-              
               />
             </PopoverContent>
           </Popover>
@@ -519,7 +550,7 @@ function Dashboard() {
                     }}
                     data={hourlyArrival}
                   >
-                      <CartesianGrid vertical={false} />
+                    <CartesianGrid vertical={false} />
                     <Bar
                       dataKey="count"
                       fill="var(--color-steps)"
@@ -551,7 +582,7 @@ function Dashboard() {
               </CardDescription> */}
             </CardFooter>
           </Card>
-          {/* <DailyBilled  /> */}
+          <DailyBilled />
         </div>
         <div className="md:col-span-4 col-span-12 flex flex-col gap-4">
           <Card x-chunk="charts-01-chunk-4">
@@ -1043,6 +1074,30 @@ function Dashboard() {
                       <Pie
                         // label
                         data={itemsAccuracyChartData}
+                        dataKey="accuracy_count"
+                        nameKey="accuracy_range"
+                      />
+                    </PieChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+              <Card x-chunk="charts-01-chunk-7">
+                <CardHeader className="p-2">
+                  <CardDescription>Special Instructions Accuray</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer
+                    config={accuracyChartConfig}
+                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+                  >
+                    <PieChart>
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                      />
+                      <Pie
+                        // label
+                        data={instrustionsAccuracyChartData}
                         dataKey="accuracy_count"
                         nameKey="accuracy_range"
                       />

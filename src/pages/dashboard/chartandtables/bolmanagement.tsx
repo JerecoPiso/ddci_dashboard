@@ -84,6 +84,9 @@ function BolManagement() {
   const [itemsAccuracyChartData, setItemsAccuracyChartData] = useState<
     AccuracyData[]
   >(() => generateAccuracyData(ranges, colors));
+  const [instrustionsAccuracyChartData, setInstrustionsAccuracyChartData] = useState<
+  AccuracyData[]
+>(() => generateAccuracyData(ranges, colors));
   const accuracyChartConfig = {
     visitors: {
       label: "Counts",
@@ -136,6 +139,12 @@ function BolManagement() {
           i === index ? { ...data, accuracy_count: total } : data
         )
       );
+    }else if (type === "instructions") {
+      setInstrustionsAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
     }
   };
   const getBOL = async (api: string) => {
@@ -169,6 +178,7 @@ function BolManagement() {
             const document_save_dates: DocumentSaveDates[] = [];
             let _turnAroundSeconds: number = 0;
             if (Object.keys(el.attributes).length > 0) {
+              console.log(el.attributes)
               accuracy_total =
                 ((parseFloat(el.attributes["billto-accuracy"]) +
                   parseFloat(el.attributes["consignee-accuracy"]) +
@@ -249,7 +259,6 @@ function BolManagement() {
       const values = ["0.00-0.25", "0.26-0.50", "0.51-0.75", "0.76-1.00"];
       const shipperAccuracy = await axios.post(
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/shipper-accuracy`,
-
         JSON.stringify(data),
         {
           headers: {
@@ -276,7 +285,7 @@ function BolManagement() {
         }
       );
       if (consigneeAccuracy.status == 200) {
-        const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
+        // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
         const _consignee_accuracy = consigneeAccuracy.data.details;
         for (let i = 0; i < values.length; i++) {
           updateAccuracy(i, "consignee", _consignee_accuracy[values[i]]);
@@ -294,7 +303,7 @@ function BolManagement() {
         }
       );
       if (billtoAccuracy.status == 200) {
-        const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
+        // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
         const _billto_accuracy = billtoAccuracy.data.details;
         for (let i = 0; i < values.length; i++) {
           updateAccuracy(i, "billto", _billto_accuracy[values[i]]);
@@ -312,12 +321,31 @@ function BolManagement() {
         }
       );
       if (itemsAccuracy.status == 200) {
-        const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
+        // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
         const _items_accuracy = itemsAccuracy.data.details;
         for (let i = 0; i < values.length; i++) {
           updateAccuracy(i, "items", _items_accuracy[values[i]]);
         }
       }
+
+      const instructionsAccuracy = await axios.post(
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/instructions-lines-accuracy`,
+
+        JSON.stringify(data),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      if (instructionsAccuracy.status == 200) {
+        const _instructions_accuracy = instructionsAccuracy.data.details;
+        for (let i = 0; i < values.length; i++) {
+          updateAccuracy(i, "instructions", _instructions_accuracy[values[i]]);
+        }
+      }
+    
       const overallAccuracy = await axios.post(
         `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
 
@@ -616,6 +644,58 @@ function BolManagement() {
                               </ChartContainer>
                             </div>
                           </div>
+
+                          {/* dummy */}
+                          <div className="md:col-span-1 col-span-2">
+                            {" "}
+                            <div className="lg:col-span-1 md:col-span-2 col-span-6">
+                              <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
+                                Reference Accuracy
+                              </p>
+                              <ChartContainer
+                                config={accuracyChartConfig}
+                                className="max-h-[300px] w-full"
+                              >
+                                <PieChart>
+                                  <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                    data={itemsAccuracyChartData}
+                                    dataKey="accuracy_count"
+                                    nameKey="accuracy_range"
+                                  />
+                                </PieChart>
+                              </ChartContainer>
+                            </div>
+                          </div>
+                          <div className="md:col-span-1 col-span-2">
+                            {" "}
+                            <div className="lg:col-span-1 md:col-span-2 col-span-6">
+                              <p className="text-center text-black/80 font-medium dark:text-muted-foreground">
+                                Special Instructions Accuracy
+                              </p>
+                              <ChartContainer
+                                config={accuracyChartConfig}
+                                className="max-h-[300px] w-full"
+                              >
+                                <PieChart>
+                                  <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                    data={instrustionsAccuracyChartData}
+                                    dataKey="accuracy_count"
+                                    nameKey="accuracy_range"
+                                  />
+                                </PieChart>
+                              </ChartContainer>
+                            </div>
+                          </div>
+
+                          {/* end dummy */}
                         </div>
                       </div>
                     </div>
