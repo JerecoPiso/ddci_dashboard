@@ -4,6 +4,7 @@ import {
   ScanText,
   ImageUp,
   Calendar as CalendarIcon,
+  TriangleAlert,
 } from "lucide-react";
 import {
   Popover,
@@ -24,18 +25,19 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getProdDate } from "@/variables/dates";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { BaseUrlContext } from "@/App";
 import ClientSelector from "@/components/ClientSelector";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { toast } from "sonner";
 interface Clients {
   name: string;
 }
 function CurrentVolume() {
   const baseUrl = useContext(BaseUrlContext);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const hasFetchedData = useRef(false);
   const [date, setDate] = useState<Date>();
   const [client, setClient] = useState<string>("");
@@ -73,11 +75,21 @@ function CurrentVolume() {
       }
       hasFetchedData.current = false;
     } catch (err: any) {
-      if (err.response.status === 403) {
-        Cookies.remove("_clients");
-        Cookies.remove("token");
-        navigate("/");
-      }
+      console.log(err);
+      toast("Error!", {
+        style: { color: "red", backgroundColor: "#ffeae4" },
+        className: "my-classname",
+        description: 'An error has occured',
+        duration: 3000,
+        icon: <TriangleAlert className="w-5 h-5" />,
+        closeButton: false,
+      });
+      
+      // if (err.response.status === 403) {
+      //   Cookies.remove("_clients");
+      //   Cookies.remove("token");
+      //   navigate("/");
+      // }
     }
   };
   const updateAccuracy = (index: number, total: number) => {

@@ -51,7 +51,7 @@ function Login() {
         user
       );
       if (response.status == 200) {
-        console.log(response.data.details)
+        // console.log(response.data.details)
         const currentDate = new Date();
         const expirationDate = new Date(
           currentDate.getTime() + 1 * 60 * 60 * 1000

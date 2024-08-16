@@ -12,19 +12,20 @@ import {
 } from "@/components/ui/chart";
 import { useState, useEffect, useRef, useContext } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, TriangleAlert } from "lucide-react";
 import { Pie, PieChart, LabelList } from "recharts";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { getProdDate } from "@/variables/dates";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { BaseUrlContext } from "@/App";
 
 import ClientSelector from "@/components/ClientSelector";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { toast } from "sonner";
 type ChartData = {
   index: number;
   count: number;
@@ -48,7 +49,7 @@ const generateChartData = (
 function TurnAroundTime() {
   const baseUrl = useContext(BaseUrlContext);
   const hasFetchedData = useRef(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [date, setDate] = useState<Date>();
   const [client, setClient] = useState<string>("");
   const [, setClients] = useState<Clients[]>([]);
@@ -207,11 +208,20 @@ function TurnAroundTime() {
       hasFetchedData.current = false;
     } catch (err: any) {
       console.log(err);
-      if (err.response.status === 403) {
-        Cookies.remove("_clients");
-        Cookies.remove("token");
-        navigate("/");
-      }
+      toast("Error!", {
+        style: { color: "red", backgroundColor: "#ffeae4" },
+        className: "my-classname",
+        description: 'An error has occured',
+        duration: 3000,
+        icon: <TriangleAlert className="w-5 h-5" />,
+        closeButton: false,
+      });
+      
+      // if (err.response.status === 403) {
+      //   Cookies.remove("_clients");
+      //   Cookies.remove("token");
+      //   navigate("/");
+      // }
     }
   };
   const handleClient = (_client: string) => {

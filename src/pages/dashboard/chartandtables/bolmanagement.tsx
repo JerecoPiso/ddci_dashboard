@@ -18,7 +18,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, TriangleAlert } from "lucide-react";
 import { useEffect, useState, useRef, useContext } from "react";
 // import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -33,11 +33,12 @@ import { DataTable } from "@/components/datatable/bolmanagement/data-table";
 import { columns } from "@/components/datatable/bolmanagement/columns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BOL, AccuracyData, generateAccuracyData } from "@/variables/bol";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import Loading from "@/components/loading";
 import axios from "axios";
 import ClientSelector from "@/components/ClientSelector";
 import { BaseUrlContext } from "@/App";
+import { toast } from "sonner";
 
 interface Clients {
   name: string;
@@ -49,7 +50,7 @@ interface DocumentSaveDates {
 function BolManagement() {
   const baseUrl = useContext(BaseUrlContext);
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const ranges = ["_025", "_2650", "_51_75", "_76100"];
   const colors = [
     "var(--color-_025)",
@@ -86,6 +87,9 @@ function BolManagement() {
   >(() => generateAccuracyData(ranges, colors));
   const [instrustionsAccuracyChartData, setInstrustionsAccuracyChartData] = useState<
   AccuracyData[]
+>(() => generateAccuracyData(ranges, colors));
+const [referenceAccuracyChartData, setReferenceAccuracyChartData] = useState<
+AccuracyData[]
 >(() => generateAccuracyData(ranges, colors));
   const accuracyChartConfig = {
     visitors: {
@@ -141,6 +145,13 @@ function BolManagement() {
       );
     }else if (type === "instructions") {
       setInstrustionsAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    }
+    else if (type === "reference") {
+      setReferenceAccuracyChartData((prevChartData) =>
         prevChartData.map((data, i) =>
           i === index ? { ...data, accuracy_count: total } : data
         )
@@ -327,7 +338,6 @@ function BolManagement() {
           updateAccuracy(i, "items", _items_accuracy[values[i]]);
         }
       }
-
       const instructionsAccuracy = await axios.post(
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/instructions-lines-accuracy`,
 
@@ -345,7 +355,22 @@ function BolManagement() {
           updateAccuracy(i, "instructions", _instructions_accuracy[values[i]]);
         }
       }
-    
+      const referenceAccuracy = await axios.post(
+        `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/reference-accuracy`,
+        JSON.stringify(data),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        }
+      );
+      if (referenceAccuracy.status == 200) {
+        const _reference_accuracy = referenceAccuracy.data.details;
+        for (let i = 0; i < values.length; i++) {
+          updateAccuracy(i, "reference", _reference_accuracy[values[i]]);
+        }
+      }
       const overallAccuracy = await axios.post(
         `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
 
@@ -366,12 +391,23 @@ function BolManagement() {
       hasFetchedData.current = false;
       setLoading(false);
     } catch (err: any) {
+      console.log(err);
+      toast("Error!", {
+        style: { color: "red", backgroundColor: "#ffeae4" },
+        className: "my-classname",
+        description: 'An error has occured',
+        duration: 3000,
+        icon: <TriangleAlert className="w-5 h-5" />,
+        closeButton: false,
+      });
+      setLoading(false)
+      // navigate("/");
       // console.log(err);
-      if (err.response.status === 403) {
-        Cookies.remove("_clients");
-        Cookies.remove("token");
-        navigate("/");
-      }
+      // if (err.response.status === 403) {
+      //   Cookies.remove("_clients");
+      //   Cookies.remove("token");
+      //   navigate("/");
+      // }
     }
   };
   const filterChange = (filter: string) => {
@@ -662,7 +698,7 @@ function BolManagement() {
                                     content={<ChartTooltipContent hideLabel />}
                                   />
                                   <Pie
-                                    data={itemsAccuracyChartData}
+                                    data={referenceAccuracyChartData}
                                     dataKey="accuracy_count"
                                     nameKey="accuracy_range"
                                   />

@@ -113,7 +113,10 @@ function Dashboard() {
   >(() => generateAccuracyData(ranges, colors));
   const [instrustionsAccuracyChartData, setInstrustionsAccuracyChartData] =
     useState<AccuracyData[]>(() => generateAccuracyData(ranges, colors));
-    const updateAccuracy = (index: number, type: string, total: number) => {
+  const [referenceAccuracyChartData, setReferenceAccuracyChartData] = useState<
+    AccuracyData[]
+    >(() => generateAccuracyData(ranges, colors));
+  const updateAccuracy = (index: number, type: string, total: number) => {
       if (type === "accuracy") {
         setAccuracyChartData((prevChartData) =>
           prevChartData.map((data, i) =>
@@ -146,6 +149,12 @@ function Dashboard() {
         );
       }else if (type === "instructions") {
         setInstrustionsAccuracyChartData((prevChartData) =>
+          prevChartData.map((data, i) =>
+            i === index ? { ...data, accuracy_count: total } : data
+          )
+        );
+      }else if (type === "reference") {
+        setReferenceAccuracyChartData((prevChartData) =>
           prevChartData.map((data, i) =>
             i === index ? { ...data, accuracy_count: total } : data
           )
@@ -299,7 +308,6 @@ function Dashboard() {
     }
     hasFetched.current = false;
   };
- 
   const getBOL = async () => {
     const _prod_date = getProdDate(date);
     const clientName = client ? client : getDefaultClient();
@@ -370,7 +378,7 @@ function Dashboard() {
       }
     }
 
-    // try
+    // 
     const instructionsAccuracy = await axios.post(
       `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/instructions-lines-accuracy`,
 
@@ -388,8 +396,25 @@ function Dashboard() {
         updateAccuracy(i, "instructions", _instructions_accuracy[values[i]]);
       }
     }
-    
-    // end try
+    const referenceAccuracy = await axios.post(
+      `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/reference-accuracy`,
+
+      JSON.stringify(data),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      }
+    );
+    if (referenceAccuracy.status == 200) {
+      const _reference_accuracy = referenceAccuracy.data.details;
+      for (let i = 0; i < values.length; i++) {
+        updateAccuracy(i, "reference", _reference_accuracy[values[i]]);
+      }
+    }
+  
+    // 
     const overallAccuracy = await axios.post(
       `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
       JSON.stringify(data),
@@ -939,7 +964,7 @@ function Dashboard() {
             </button>
             <Card x-chunk="charts-01-chunk-7" className="flex flex-col">
               <CardHeader className="p-2">
-                <CardDescription>Overall Accuray</CardDescription>
+                <CardDescription>Overall Accuracy</CardDescription>
                 <div>
                   <p className=" text-black/80 font-medium dark:text-muted-foreground text-xs">
                     Legend
@@ -987,7 +1012,7 @@ function Dashboard() {
             <CollapsibleContent className="space-y-2">
               <Card x-chunk="charts-01-chunk-7">
                 <CardHeader className="p-2">
-                  <CardDescription>Shipper Accuray</CardDescription>
+                  <CardDescription>Shipper Accuracy</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -1011,7 +1036,7 @@ function Dashboard() {
               </Card>
               <Card x-chunk="charts-01-chunk-7">
                 <CardHeader className="p-2">
-                  <CardDescription>Consignee Accuray</CardDescription>
+                  <CardDescription>Consignee Accuracy</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -1035,7 +1060,7 @@ function Dashboard() {
               </Card>
               <Card x-chunk="charts-01-chunk-7">
                 <CardHeader className="p-2">
-                  <CardDescription>Bill to Accuray</CardDescription>
+                  <CardDescription>Bill to Accuracy</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -1059,7 +1084,7 @@ function Dashboard() {
               </Card>
               <Card x-chunk="charts-01-chunk-7">
                 <CardHeader className="p-2">
-                  <CardDescription>Items Accuray</CardDescription>
+                  <CardDescription>Items Accuracy</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
@@ -1083,7 +1108,31 @@ function Dashboard() {
               </Card>
               <Card x-chunk="charts-01-chunk-7">
                 <CardHeader className="p-2">
-                  <CardDescription>Special Instructions Accuray</CardDescription>
+                  <CardDescription>Reference Accuracy</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer
+                    config={accuracyChartConfig}
+                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+                  >
+                    <PieChart>
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent hideLabel />}
+                      />
+                      <Pie
+                        // label
+                        data={referenceAccuracyChartData}
+                        dataKey="accuracy_count"
+                        nameKey="accuracy_range"
+                      />
+                    </PieChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+              <Card x-chunk="charts-01-chunk-7">
+                <CardHeader className="p-2">
+                  <CardDescription>Special Instructions Accuracy</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
