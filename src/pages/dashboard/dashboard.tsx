@@ -42,9 +42,9 @@ import {
   // LineChart,
   Pie,
   PieChart,
-  PolarAngleAxis,
-  RadialBar,
-  RadialBarChart,
+  // PolarAngleAxis,
+  // RadialBar,
+  // RadialBarChart,
   Rectangle,
   ResponsiveContainer,
   XAxis,
@@ -75,7 +75,7 @@ import {
   colors,
   countComparer,
 } from "@/variables/dashboard";
-import DailyBilled from "@/components/charts/dailybilled";
+// import DailyBilled from "@/components/charts/dailybilled";
 // import { CaretSortIcon } from "@radix-ui/react-icons";
 function Dashboard() {
   const headers = {
@@ -243,7 +243,7 @@ function Dashboard() {
     });
     setHourlyArrivalTotal(_hourlyArrivalTotal);
     setPreviousHourlyArrivalTotal(_previousHourlyTotal);
-    console.log(_hourly);
+    // console.log(_hourly);
     setHourlyArrival(_hourly);
     hasFetched.current = false;
   };
@@ -607,7 +607,7 @@ function Dashboard() {
               </CardDescription> */}
             </CardFooter>
           </Card>
-          <DailyBilled />
+          {/* <DailyBilled /> */}
         </div>
         <div className="md:col-span-4 col-span-12 flex flex-col gap-4">
           <Card x-chunk="charts-01-chunk-4">
@@ -756,7 +756,7 @@ function Dashboard() {
               </div>
             </CardFooter>
           </Card>
-          <Card x-chunk="charts-01-chunk-5">
+          {/* <Card x-chunk="charts-01-chunk-5">
             <CardContent className="flex gap-4 p-4">
               <div className="grid items-center gap-2">
                 <div className="grid flex-1 auto-rows-min gap-0.5">
@@ -843,7 +843,7 @@ function Dashboard() {
                 </RadialBarChart>
               </ChartContainer>
             </CardContent>
-          </Card>
+          </Card> */}
           {/* <Card x-chunk="charts-01-chunk-7">
             <CardHeader className="space-y-0 pb-0">
               <CardDescription>Time</CardDescription>

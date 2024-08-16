@@ -29,8 +29,10 @@ function Login() {
   const [islogin, setIsLogin] = useState<boolean>(false);
 
   const [user, setUser] = useState<User>({
-    username: "dashboard",
-    password: "Aa@123!",
+    // username: "dashboard",
+    // password: "Aa@123!",
+    username: "",
+    password: "",
   });
   const [theme] = useState<string | null>(
     localStorage.getItem("vite-ui-theme")

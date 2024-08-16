@@ -79,7 +79,7 @@ function UserManagement() {
       }
     );
     if (response.status === 200) {
-      console.log(response.data.details);
+      // console.log(response.data.details);
       setUsers(response.data.details);
     }
   };

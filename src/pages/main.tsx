@@ -139,7 +139,7 @@ function Main() {
             </TooltipTrigger>
             <TooltipContent side="right">Turn Around Time </TooltipContent>
           </Tooltip>
-          {roles?.includes("ROLE_ADMIN") && (
+          {(roles?.includes("ROLE_ADMIN") || roles?.includes("ROLE_SYSTEM")) && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
