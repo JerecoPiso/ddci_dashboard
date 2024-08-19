@@ -55,7 +55,7 @@ import {
   getPreviousDate,
   getSelectedDate,
   setCookie,
-  getSelectedClient
+  getSelectedClient,
 } from "@/variables/dates";
 import { Separator } from "@/components/ui/separator";
 import ClientSelector from "@/components/ClientSelector";
@@ -210,7 +210,7 @@ function Dashboard() {
   });
   const handleClient = (_client: string) => {
     hasFetched.current = false;
-    setCookie("_selectedClient", _client)
+    setCookie("_selectedClient", _client);
     setClient(_client);
   };
   const getDefaultClient = () => {
@@ -233,13 +233,10 @@ function Dashboard() {
     let _hourlyArrivalTotal: number = 0;
     let _previousHourlyTotal: number = 0;
     response.data.details.forEach((el: any) => {
+      const _hr: number = Number(el[0])
       _hourly.push({
         time:
-          Number(el[0]) < 12
-            ? (el[0] >= 0 ? el[0] : "0") + " AM"
-            : el[0] <= 12
-            ? el[0] + " PM"
-            : el[0] - 12 + " PM",
+        _hr < 12 ? (_hr >= 0 ? _hr : "0") + " AM" : (_hr == 12 ? _hr : _hr - 12) + " PM",
         count: el[1],
       });
       _hourlyArrivalTotal += el[1];
@@ -432,7 +429,7 @@ function Dashboard() {
   };
   const handleDate = (day: any) => {
     setDate(day ?? new Date());
-    setCookie("_selectedDate", day ?? new Date())
+    setCookie("_selectedDate", day ?? new Date());
   };
   useEffect(() => {
     if (Cookies.get("token")) {
@@ -443,13 +440,12 @@ function Dashboard() {
       });
       setClients(clientsList);
       if (client == "") {
-          setClient(__clients[0]);
+        setClient(__clients[0]);
       }
     }
   }, [client]);
   useEffect(() => {
-    if (!hasFetched.current) { 
-
+    if (!hasFetched.current) {
       getHourlyArrival();
       documentCounts();
       getBOL();
@@ -488,7 +484,9 @@ function Dashboard() {
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
+                
                 selected={date}
+                defaultMonth={date}
                 onSelect={handleDate}
                 initialFocus
               />
