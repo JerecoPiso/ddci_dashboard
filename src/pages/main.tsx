@@ -12,13 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
 } from "@/components/ui/alert-dialog";
-import {
-  UserCircle,
-  Package2,
-  PanelLeft,
-  Home,
-  LayoutDashboard,
-} from "lucide-react";
+import { UserCircle, PanelLeft, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import {
@@ -28,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Cookies from "js-cookie";
 import {
   Tooltip,
@@ -54,6 +48,8 @@ function Main() {
   const logoutUser = () => {
     Cookies.remove("token");
     Cookies.remove("_clients");
+    Cookies.remove("_selectedClient");
+    Cookies.remove("_authorities");
     navigate("/");
   };
   useEffect(() => {
@@ -139,7 +135,8 @@ function Main() {
             </TooltipTrigger>
             <TooltipContent side="right">Turn Around Time </TooltipContent>
           </Tooltip>
-          {(roles?.includes("ROLE_ADMIN") || roles?.includes("ROLE_SYSTEM")) && (
+          {(roles?.includes("ROLE_ADMIN") ||
+            roles?.includes("ROLE_SYSTEM")) && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
@@ -162,6 +159,9 @@ function Main() {
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
+        
+            <SheetTitle  className="hidden"></SheetTitle>
+            <SheetDescription className="hidden"></SheetDescription>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">
                 <PanelLeft className="h-5 w-5" />
@@ -169,20 +169,58 @@ function Main() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
+              <nav className="grid text-lg font-medium mt-4 gap-y-2">
                 <Link
-                  to="#"
-                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
+                  to="/dashboard/"
+                  className={`${
+                    currentPath === "/dashboard/" ||
+                    currentPath === "/dashboard/" ||
+                    currentPath === "/dashboard/"
+                      ? "bg-accent"
+                      : "text-white"
+                  } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}
                 >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">Acme Inc</span>
+                  <LayoutDashboard className="h-5 w-5" />
+                  Dashboard
                 </Link>
                 <Link
-                  to="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                  to="/dashboard/bolmanagement"
+                  className={`${
+                    currentPath === "/dashboard/bolmanagement" ||
+                    currentPath === "/dashboard/bolmanagement" ||
+                    currentPath === "/dashboard/bolmanagement"
+                      ? "bg-accent"
+                      : "text-white"
+                  } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}
                 >
-                  <Home className="h-5 w-5" />
-                  Dashboard
+                  <SquareChartGantt className="h-5 w-5" />
+                  BOL Management
+                </Link>
+                <Link
+                  to="/dashboard/currentvolume"
+                  className={`${
+                    currentPath === "/dashboard/currentvolume" ||
+                    currentPath === "/dashboard/currentvolume" ||
+                    currentPath === "/dashboard/currentvolume"
+                      ? "bg-accent"
+                      : "text-white"
+                  } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}
+                >
+                  <ImageDown className="h-5 w-5" />
+                  Current Volume
+                </Link>
+                <Link
+                  to="/dashboard/turnaroundtime"
+                  className={`${
+                    currentPath === "/dashboard/turnaroundtime" ||
+                    currentPath === "/dashboard/turnaroundtime" ||
+                    currentPath === "/dashboard/turnaroundtime"
+                      ? "bg-accent"
+                      : "text-white"
+                  } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}
+                >
+                  <Timer className="h-5 w-5" />
+                  Turn Around Time
                 </Link>
               </nav>
             </SheetContent>

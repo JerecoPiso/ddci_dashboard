@@ -24,7 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { getProdDate } from "@/variables/dates";
+import { getProdDate, setCookie, getSelectedDate,getSelectedClient } from "@/variables/dates";
 // import { useNavigate } from "react-router-dom";
 import { BaseUrlContext } from "@/App";
 import ClientSelector from "@/components/ClientSelector";
@@ -39,8 +39,8 @@ function CurrentVolume() {
 
   // const navigate = useNavigate();
   const hasFetchedData = useRef(false);
-  const [date, setDate] = useState<Date>();
-  const [client, setClient] = useState<string>("");
+  const [date, setDate] = useState<Date | undefined>(getSelectedDate());
+  const [client, setClient] = useState<string>(getSelectedClient());
   const [, setClients] = useState<Clients[]>([]);
   const [chartData, setChartData] = useState([
     { status: "UPLOADED", count: 0 },
@@ -79,12 +79,12 @@ function CurrentVolume() {
       toast("Error!", {
         style: { color: "red", backgroundColor: "#ffeae4" },
         className: "my-classname",
-        description: 'An error has occured',
+        description: "An error has occured",
         duration: 3000,
         icon: <TriangleAlert className="w-5 h-5" />,
         closeButton: false,
       });
-      
+
       // if (err.response.status === 403) {
       //   Cookies.remove("_clients");
       //   Cookies.remove("token");
@@ -101,7 +101,13 @@ function CurrentVolume() {
   };
   const handleClient = (_client: string) => {
     hasFetchedData.current = false;
+    setCookie("_selectedClient", _client)
+
     setClient(_client);
+  };
+  const handleDate = (day: any) => {
+    setDate(day ?? new Date());
+    setCookie("_selectedDate", day ?? new Date());
   };
   const getDefaultClient = () => {
     const __clients = JSON.parse(Cookies.get("_clients") || "");
@@ -116,7 +122,11 @@ function CurrentVolume() {
       });
       setClients(clientsList);
       if (client == "") {
-        setClient(__clients[0]);
+        if (Cookies.get("_selectedClient")) {
+          setClient(Cookies.get("_selectedClient") || "");
+        } else {
+          setClient(__clients[0]);
+        }
       }
     }
 
@@ -153,7 +163,7 @@ function CurrentVolume() {
                   <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={handleDate}
                     initialFocus
                   />
                 </PopoverContent>

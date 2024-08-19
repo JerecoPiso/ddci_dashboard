@@ -22,7 +22,7 @@ import { Calendar as CalendarIcon, TriangleAlert } from "lucide-react";
 import { useEffect, useState, useRef, useContext } from "react";
 // import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { getProdDate } from "@/variables/dates";
+import { getProdDate, setCookie, getSelectedDate, getSelectedClient } from "@/variables/dates";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -58,14 +58,14 @@ function BolManagement() {
     "var(--color-_51_75)",
     "var(--color-_76100)",
   ];
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | undefined>(getSelectedDate());
   const [pageCount, setPageCount] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [status, setStatus] = useState<string>("ALL");
   const [rowSize, setRowSize] = useState<number>(10);
   const [loading, setLoading] = useState<boolean>(false);
   // const [bols, setBols] = useState<BOL[]>([]);
-  const [client, setClient] = useState<string>("");
+  const [client, setClient] = useState<string>(getSelectedClient());
   const [, setClients] = useState<Clients[]>([]);
   const [bols, setBols] = useState<BOL[]>([]);
 
@@ -435,7 +435,12 @@ AccuracyData[]
   };
   const handleClient = (_client: string) => {
     hasFetchedData.current = false;
+    setCookie("_selectedClient", _client)
     setClient(_client);
+  };
+  const handleDate = (day: any) => {
+    setDate(day ?? new Date());
+    setCookie("_selectedDate", day ?? new Date())
   };
   const getDefaultClient = () => {
     const __clients = JSON.parse(Cookies.get("_clients") || "");
@@ -458,10 +463,14 @@ AccuracyData[]
       });
       setClients(clientsList);
       if (client == "") {
-        setClient(__clients[0]);
+        if(Cookies.get("_selectedClient")){
+          setClient(Cookies.get("_selectedClient") || '')
+        }else{
+          setClient(__clients[0]);
+        }
       }
     }
-   
+
     // setClient(__clients[0 ])
   }, [client]);
   useEffect(() => {
@@ -507,7 +516,7 @@ AccuracyData[]
                   <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={handleDate}
                     initialFocus
                   />
                 </PopoverContent>

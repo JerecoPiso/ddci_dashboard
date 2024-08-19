@@ -50,7 +50,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getProdDate, getPreviousDate } from "@/variables/dates";
+import {
+  getProdDate,
+  getPreviousDate,
+  getSelectedDate,
+  setCookie,
+  getSelectedClient
+} from "@/variables/dates";
 import { Separator } from "@/components/ui/separator";
 import ClientSelector from "@/components/ClientSelector";
 import Cookies from "js-cookie";
@@ -85,13 +91,12 @@ function Dashboard() {
     },
   };
   const [isToggleAccuracy, setIsToggleAccuracy] = useState(false);
-
   const baseUrl = useContext(BaseUrlContext);
   const hasFetched = useRef(false);
-  const [client, setClient] = useState<string>("");
+  const [client, setClient] = useState<string>(getSelectedClient());
   const [loading, setLoading] = useState<boolean>(true);
   const [, setClients] = useState<Clients[]>([]);
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | undefined>(getSelectedDate());
   const [hourlyArrival, setHourlyArrival] = useState<HourlyArrival[]>([]);
   const [hourlyArrivalTotal, setHourlyArrivalTotal] = useState<number>(0);
   const [totalReceive, setTotalReceive] = useState<number>(0);
@@ -115,52 +120,52 @@ function Dashboard() {
     useState<AccuracyData[]>(() => generateAccuracyData(ranges, colors));
   const [referenceAccuracyChartData, setReferenceAccuracyChartData] = useState<
     AccuracyData[]
-    >(() => generateAccuracyData(ranges, colors));
+  >(() => generateAccuracyData(ranges, colors));
   const updateAccuracy = (index: number, type: string, total: number) => {
-      if (type === "accuracy") {
-        setAccuracyChartData((prevChartData) =>
-          prevChartData.map((data, i) =>
-            i === index ? { ...data, accuracy_count: total } : data
-          )
-        );
-      } else if (type === "shipper") {
-        setShipperAccuracyChartData((prevChartData) =>
-          prevChartData.map((data, i) =>
-            i === index ? { ...data, accuracy_count: total } : data
-          )
-        );
-      } else if (type === "consignee") {
-        setConsigneeAccuracyChartData((prevChartData) =>
-          prevChartData.map((data, i) =>
-            i === index ? { ...data, accuracy_count: total } : data
-          )
-        );
-      } else if (type === "billto") {
-        setBilltoAccuracyChartData((prevChartData) =>
-          prevChartData.map((data, i) =>
-            i === index ? { ...data, accuracy_count: total } : data
-          )
-        );
-      } else if (type === "items") {
-        setItemsAccuracyChartData((prevChartData) =>
-          prevChartData.map((data, i) =>
-            i === index ? { ...data, accuracy_count: total } : data
-          )
-        );
-      }else if (type === "instructions") {
-        setInstrustionsAccuracyChartData((prevChartData) =>
-          prevChartData.map((data, i) =>
-            i === index ? { ...data, accuracy_count: total } : data
-          )
-        );
-      }else if (type === "reference") {
-        setReferenceAccuracyChartData((prevChartData) =>
-          prevChartData.map((data, i) =>
-            i === index ? { ...data, accuracy_count: total } : data
-          )
-        );
-      }
-    };
+    if (type === "accuracy") {
+      setAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    } else if (type === "shipper") {
+      setShipperAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    } else if (type === "consignee") {
+      setConsigneeAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    } else if (type === "billto") {
+      setBilltoAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    } else if (type === "items") {
+      setItemsAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    } else if (type === "instructions") {
+      setInstrustionsAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    } else if (type === "reference") {
+      setReferenceAccuracyChartData((prevChartData) =>
+        prevChartData.map((data, i) =>
+          i === index ? { ...data, accuracy_count: total } : data
+        )
+      );
+    }
+  };
   const accuracyChartConfig = {
     visitors: {
       label: "Counts",
@@ -205,6 +210,7 @@ function Dashboard() {
   });
   const handleClient = (_client: string) => {
     hasFetched.current = false;
+    setCookie("_selectedClient", _client)
     setClient(_client);
   };
   const getDefaultClient = () => {
@@ -245,7 +251,7 @@ function Dashboard() {
     setPreviousHourlyArrivalTotal(_previousHourlyTotal);
     // console.log(_hourly);
     setHourlyArrival(_hourly);
-    hasFetched.current = false;
+    // hasFetched.current = false;
   };
   const documentCounts = async () => {
     const _prod_date = getProdDate(date);
@@ -306,7 +312,7 @@ function Dashboard() {
         ocred: _values.OCRED,
       });
     }
-    hasFetched.current = false;
+    // hasFetched.current = false;
   };
   const getBOL = async () => {
     const _prod_date = getProdDate(date);
@@ -347,7 +353,6 @@ function Dashboard() {
       headers
     );
     if (consigneeAccuracy.status == 200) {
-      // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
       const _consignee_accuracy = consigneeAccuracy.data.details;
       for (let i = 0; i < values.length; i++) {
         updateAccuracy(i, "consignee", _consignee_accuracy[values[i]]);
@@ -359,7 +364,6 @@ function Dashboard() {
       headers
     );
     if (billtoAccuracy.status == 200) {
-      // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
       const _billto_accuracy = billtoAccuracy.data.details;
       for (let i = 0; i < values.length; i++) {
         updateAccuracy(i, "billto", _billto_accuracy[values[i]]);
@@ -371,14 +375,12 @@ function Dashboard() {
       headers
     );
     if (itemsAccuracy.status == 200) {
-      // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
       const _items_accuracy = itemsAccuracy.data.details;
       for (let i = 0; i < values.length; i++) {
         updateAccuracy(i, "items", _items_accuracy[values[i]]);
       }
     }
-
-    // 
+    //
     const instructionsAccuracy = await axios.post(
       `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/instructions-lines-accuracy`,
 
@@ -413,8 +415,8 @@ function Dashboard() {
         updateAccuracy(i, "reference", _reference_accuracy[values[i]]);
       }
     }
-  
-    // 
+
+    //
     const overallAccuracy = await axios.post(
       `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
       JSON.stringify(data),
@@ -426,6 +428,11 @@ function Dashboard() {
         updateAccuracy(i, "accuracy", _overall_accuracy[values[i]]);
       }
     }
+    hasFetched.current = false;
+  };
+  const handleDate = (day: any) => {
+    setDate(day ?? new Date());
+    setCookie("_selectedDate", day ?? new Date())
   };
   useEffect(() => {
     if (Cookies.get("token")) {
@@ -436,12 +443,13 @@ function Dashboard() {
       });
       setClients(clientsList);
       if (client == "") {
-        setClient(__clients[0]);
+          setClient(__clients[0]);
       }
     }
   }, [client]);
   useEffect(() => {
-    if (!hasFetched.current) {
+    if (!hasFetched.current) { 
+
       getHourlyArrival();
       documentCounts();
       getBOL();
@@ -481,7 +489,7 @@ function Dashboard() {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={handleDate}
                 initialFocus
               />
             </PopoverContent>
@@ -1132,7 +1140,9 @@ function Dashboard() {
               </Card>
               <Card x-chunk="charts-01-chunk-7">
                 <CardHeader className="p-2">
-                  <CardDescription>Special Instructions Accuracy</CardDescription>
+                  <CardDescription>
+                    Special Instructions Accuracy
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ChartContainer
