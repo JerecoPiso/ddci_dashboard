@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import Cookies from "js-cookie";
 export const downloadReport = (
   baseurl: string,
   client: string,
   prod_date: string,
-  report_name: string
+  report_name: string,
+  onDownloadProgress:  (progressEvent: any) => void
 ) => {
   axios
     .get(
@@ -15,6 +17,7 @@ export const downloadReport = (
           Authorization: `Bearer ${Cookies.get("token")}`,
         },
         responseType: "arraybuffer",
+        onDownloadProgress: onDownloadProgress
       }
     )
     .then((response) => {

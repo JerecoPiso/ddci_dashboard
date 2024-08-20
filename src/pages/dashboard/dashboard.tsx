@@ -82,6 +82,8 @@ import {
   colors,
   countComparer,
 } from "@/variables/dashboard";
+import { Progress } from "@/components/ui/progress";
+
 // import { Input } from "@/components/ui/input";
 // import { Label } from "@/components/ui/label";
 import { downloadReport } from "@/reports/download";
@@ -94,6 +96,8 @@ function Dashboard() {
       Authorization: `Bearer ${Cookies.get("token")}`,
     },
   };
+  const [downloadProgress, setDownloadProgress] = useState<number>(0);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [isToggleAccuracy, setIsToggleAccuracy] = useState(false);
   const baseUrl = useContext(BaseUrlContext);
   const hasFetched = useRef(false);
@@ -437,6 +441,26 @@ function Dashboard() {
     setDate(day ?? new Date());
     setCookie("_selectedDate", day ?? new Date());
   };
+  const handleDownload = () => {
+    setIsDownloading(true);
+    downloadReport(
+      baseUrl,
+      client,
+      getProdDate(date),
+      "account-report",
+      (progressEvent: any) => {
+        setDownloadProgress(
+          Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        );
+        if (
+          Math.round((progressEvent.loaded * 100) / progressEvent.total) == 100
+        ) {
+          setIsDownloading(false);
+          setDownloadProgress(0)
+        }
+      }
+    );
+  };
   // const downloadReport = () => {
   //   axios
   //     .get(
@@ -453,7 +477,7 @@ function Dashboard() {
   //       const url = window.URL.createObjectURL(new Blob([response.data]));
   //       const link = document.createElement('a');
   //       link.href = url;
-  //       link.setAttribute('download', `TEST04_2024-08-20.xlsx`); 
+  //       link.setAttribute('download', `TEST04_2024-08-20.xlsx`);
   //       document.body.appendChild(link);
   //       link.click();
   //       // Clean up
@@ -490,6 +514,15 @@ function Dashboard() {
   }, [client, date]);
   return (
     <div>
+      {isDownloading && (
+        <div className="fixed flex w-full h-full justify-center items-center z-[999] top-0 left-0 bg-slate-700/45">
+          <Progress
+            value={downloadProgress}
+            className="md:w-[50%] w-full border border-slate-300"
+          />
+        </div>
+      )}
+
       {loading ? (
         <div className="flex justify-center items-center fixed w-full h-full bg-slate-900/30 left-0 top-0 z-40">
           <Loading size={150} />
@@ -526,7 +559,7 @@ function Dashboard() {
             </PopoverContent>
           </Popover>
           <ClientSelector onClientChange={handleClient} activeClient={client} />
-          <Popover >
+          <Popover>
             <PopoverTrigger asChild>
               <Button className="bg-blue-800 text-sm font-normal hover:bg-blue-700 text-white dark:bg-slate-700 pb-2 pt-[8px] px-3 rounded-sm">
                 <FileDown />
@@ -535,10 +568,10 @@ function Dashboard() {
             <PopoverContent className="w-80 mr-5 mb-2">
               <button
                 type="button"
-                onClick={() => downloadReport(baseUrl, client, getProdDate(date), 'account-report')}
+                onClick={() => handleDownload()}
                 className="flex gap-x-3 border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
               >
-               <Download />  Download Account Report
+                <Download /> Download Account Report
               </button>
             </PopoverContent>
           </Popover>
