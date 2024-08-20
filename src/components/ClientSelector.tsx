@@ -45,7 +45,7 @@ function ClientSelector({ onClientChange, activeClient }: Clients) {
   return (
     <>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger className="bg-red-800 text-sm font-normal text-white dark:bg-slate-700 pb-2 pt-[8px] px-3 rounded-sm">
+        <SheetTrigger className="bg-emerald-600 text-sm font-normal text-white dark:bg-slate-700 py-[10px] px-3 rounded-sm">
           Change / ({client})
         </SheetTrigger>
         <SheetContent>

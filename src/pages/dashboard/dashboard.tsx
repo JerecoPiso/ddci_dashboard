@@ -8,6 +8,8 @@ import {
   CalendarIcon,
   ChevronDown,
   ChevronUp,
+  FileDown,
+  Download,
 } from "lucide-react";
 import {
   Popover,
@@ -72,7 +74,6 @@ import {
   CollapsibleContent,
   // CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-
 import {
   Clients,
   Counts,
@@ -81,6 +82,9 @@ import {
   colors,
   countComparer,
 } from "@/variables/dashboard";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+import { downloadReport } from "@/reports/download";
 // import DailyBilled from "@/components/charts/dailybilled";
 // import { CaretSortIcon } from "@radix-ui/react-icons";
 function Dashboard() {
@@ -233,10 +237,12 @@ function Dashboard() {
     let _hourlyArrivalTotal: number = 0;
     let _previousHourlyTotal: number = 0;
     response.data.details.forEach((el: any) => {
-      const _hr: number = Number(el[0])
+      const _hr: number = Number(el[0]);
       _hourly.push({
         time:
-        _hr < 12 ? (_hr >= 0 ? _hr : "0") + " AM" : (_hr == 12 ? _hr : _hr - 12) + " PM",
+          _hr < 12
+            ? (_hr >= 0 ? _hr : "0") + " AM"
+            : (_hr == 12 ? _hr : _hr - 12) + " PM",
         count: el[1],
       });
       _hourlyArrivalTotal += el[1];
@@ -431,6 +437,34 @@ function Dashboard() {
     setDate(day ?? new Date());
     setCookie("_selectedDate", day ?? new Date());
   };
+  // const downloadReport = () => {
+  //   axios
+  //     .get(
+  //       "http://192.168.23.84:8007/ddcic/api/v1/document/download/account-report/TEST04/2024-08-20",
+  //       {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Authorization: `Bearer ${Cookies.get("token")}`,
+  //         },
+  //         responseType: 'arraybuffer',
+  //       }
+  //     )
+  //     .then((response) => {
+  //       const url = window.URL.createObjectURL(new Blob([response.data]));
+  //       const link = document.createElement('a');
+  //       link.href = url;
+  //       link.setAttribute('download', `TEST04_2024-08-20.xlsx`); 
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       // Clean up
+
+  //       link.remove();
+  //       window.URL.revokeObjectURL(url);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error downloading the file", error);
+  //     });
+  // };
   useEffect(() => {
     if (Cookies.get("token")) {
       const __clients = JSON.parse(Cookies.get("_clients") || "");
@@ -473,7 +507,7 @@ function Dashboard() {
               <Button
                 variant={"outline"}
                 className={cn(
-                  "w-[220px] justify-start text-left font-normal border border-red-800 dark:border-none",
+                  "w-[220px] justify-start text-left font-normal border border-slate-800 dark:hover:border-slate-300",
                   !date && "text-muted-foreground"
                 )}
               >
@@ -484,7 +518,6 @@ function Dashboard() {
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                
                 selected={date}
                 defaultMonth={date}
                 onSelect={handleDate}
@@ -493,6 +526,22 @@ function Dashboard() {
             </PopoverContent>
           </Popover>
           <ClientSelector onClientChange={handleClient} activeClient={client} />
+          <Popover >
+            <PopoverTrigger asChild>
+              <Button className="bg-blue-800 text-sm font-normal hover:bg-blue-700 text-white dark:bg-slate-700 pb-2 pt-[8px] px-3 rounded-sm">
+                <FileDown />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 mr-5 mb-2">
+              <button
+                type="button"
+                onClick={() => downloadReport(baseUrl, client, getProdDate(date), 'account-report')}
+                className="flex gap-x-3 border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
+              >
+               <Download />  Download Account Report
+              </button>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
