@@ -17,11 +17,6 @@ export type AccuracyData = {
   fill: string;
 };
 
-// const generateRandomNumber = () => {
-//   const number = Math.floor(Math.random() * 100) + 1; // Generates a number between 1 and 100
-//   return number;
-// };
-
 export const generateAccuracyData = (
     ranges: string[],
     colors: string[]

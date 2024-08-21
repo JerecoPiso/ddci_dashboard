@@ -22,7 +22,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import Cookies from "js-cookie";
 import {
   Tooltip,
@@ -54,7 +60,6 @@ function Main() {
   };
   useEffect(() => {
     setRoles(JSON.stringify(Cookies.get("_authorities")));
-    // console.log(typeof JSON.parse(Cookies.get('_authorities')) || '')
     if (!Cookies.get("token")) {
       navigate("/");
     }
@@ -159,8 +164,7 @@ function Main() {
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Sheet>
-        
-            <SheetTitle  className="hidden"></SheetTitle>
+            <SheetTitle className="hidden"></SheetTitle>
             <SheetDescription className="hidden"></SheetDescription>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">

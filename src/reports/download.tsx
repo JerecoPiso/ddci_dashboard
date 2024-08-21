@@ -6,25 +6,28 @@ export const downloadReport = (
   client: string,
   prod_date: string,
   report_name: string,
-  onDownloadProgress:  (progressEvent: any) => void
+  onDownloadProgress: (progressEvent: any) => void,
+  onError: (error: any) => void // Add an onError callback
+  
+  // setIsDownloading: (condition: boolean) => void
 ) => {
   axios
-    .get(
-      `${baseurl}document/download/${report_name}/${client}/${prod_date}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-        responseType: "arraybuffer",
-        onDownloadProgress: onDownloadProgress
-      }
-    )
+    .get(`${baseurl}document/download/${report_name}/${client}/${prod_date}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+      responseType: "arraybuffer",
+      onDownloadProgress: onDownloadProgress,
+    })
     .then((response) => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `${report_name.toUpperCase()}_${client}_${prod_date}.xlsx`);
+      link.setAttribute(
+        "download",
+        `${report_name.toUpperCase()}_${client}_${prod_date}.xlsx`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -32,5 +35,6 @@ export const downloadReport = (
     })
     .catch((error) => {
       console.error("Error downloading the file", error);
+      onError(error); // Trigger the onError callback if an error occurs
     });
 };

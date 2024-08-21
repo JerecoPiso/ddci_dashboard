@@ -18,7 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { getProdDate, getSelectedDate, setCookie, getSelectedClient } from "@/variables/dates";
+import { getProdDate, getSelectedDate, setCookie, getSelectedClient } from "@/utils/dates";
 // import { useNavigate } from "react-router-dom";
 import { BaseUrlContext } from "@/App";
 

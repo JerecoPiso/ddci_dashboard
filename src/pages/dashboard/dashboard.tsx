@@ -10,6 +10,7 @@ import {
   ChevronUp,
   FileDown,
   Download,
+  TriangleAlert,
 } from "lucide-react";
 import {
   Popover,
@@ -32,6 +33,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import AccuracyChart from "@/components/charts/accuracy";
 import {
   // Area,
   // AreaChart,
@@ -58,7 +60,7 @@ import {
   getSelectedDate,
   setCookie,
   getSelectedClient,
-} from "@/variables/dates";
+} from "@/utils/dates";
 import { Separator } from "@/components/ui/separator";
 import ClientSelector from "@/components/ClientSelector";
 import Cookies from "js-cookie";
@@ -69,11 +71,7 @@ import { Calendar } from "@/components/ui/calendar";
 import Loading from "@/components/loading";
 import { BaseUrlContext } from "@/App";
 import { AccuracyData, generateAccuracyData } from "@/variables/bol";
-import {
-  Collapsible,
-  CollapsibleContent,
-  // CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Clients,
   Counts,
@@ -83,12 +81,9 @@ import {
   countComparer,
 } from "@/variables/dashboard";
 import { Progress } from "@/components/ui/progress";
-
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { downloadReport } from "@/reports/download";
 // import DailyBilled from "@/components/charts/dailybilled";
-// import { CaretSortIcon } from "@radix-ui/react-icons";
 function Dashboard() {
   const headers = {
     headers: {
@@ -392,12 +387,7 @@ function Dashboard() {
       `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/instructions-lines-accuracy`,
 
       JSON.stringify(data),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-      }
+      headers
     );
     if (instructionsAccuracy.status == 200) {
       const _instructions_accuracy = instructionsAccuracy.data.details;
@@ -409,12 +399,7 @@ function Dashboard() {
       `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/reference-accuracy`,
 
       JSON.stringify(data),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-      }
+      headers
     );
     if (referenceAccuracy.status == 200) {
       const _reference_accuracy = referenceAccuracy.data.details;
@@ -441,24 +426,37 @@ function Dashboard() {
     setDate(day ?? new Date());
     setCookie("_selectedDate", day ?? new Date());
   };
-  const handleDownload = () => {
+  const handleDownload = (report_type: string) => {
     setIsDownloading(true);
     downloadReport(
       baseUrl,
       client,
       getProdDate(date),
-      "account-report",
+      report_type,
       (progressEvent: any) => {
+        // console.log(progressEvent);
         setDownloadProgress(
           Math.round((progressEvent.loaded * 100) / progressEvent.total)
         );
-        if (
-          Math.round((progressEvent.loaded * 100) / progressEvent.total) == 100
-        ) {
+        if (progressEvent.loaded == progressEvent.total) {
           setIsDownloading(false);
-          setDownloadProgress(0)
+          setDownloadProgress(0);
         }
-      }
+      },
+      (error: any) => {
+        // Handle the error here
+        toast("Error!", {
+          style: { color: "red", backgroundColor: "#ffeae4" },
+          className: "my-classname",
+          description: "Failed to download the report",
+          duration: 3000,
+          icon: <TriangleAlert className="w-5 h-5" />,
+          closeButton: false,
+        });
+        console.error("Failed to download the report:", error.response.data);
+        setIsDownloading(false);
+      },
+      
     );
   };
   // const downloadReport = () => {
@@ -522,7 +520,6 @@ function Dashboard() {
           />
         </div>
       )}
-
       {loading ? (
         <div className="flex justify-center items-center fixed w-full h-full bg-slate-900/30 left-0 top-0 z-40">
           <Loading size={150} />
@@ -565,13 +562,27 @@ function Dashboard() {
                 <FileDown />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 mr-5 mb-2">
+            <PopoverContent className="w-64 mr-5 mb-2">
               <button
                 type="button"
-                onClick={() => handleDownload()}
-                className="flex gap-x-3 border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
+                onClick={() => handleDownload("accuracy-report")}
+                className="flex gap-x-3 text-sm border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
               >
-                <Download /> Download Account Report
+                <Download className="h-4 w-4" /> Accuracy Report
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload("billing-report")}
+                className="mt-1 flex gap-x-3 text-sm border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
+              >
+                <Download className="h-4 w-4" /> Billing Report
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload("account-report")}
+                className="mt-1 flex gap-x-3 text-sm border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
+              >
+                <Download className="h-4 w-4" /> Account Report
               </button>
             </PopoverContent>
           </Popover>
@@ -1098,152 +1109,30 @@ function Dashboard() {
               </CardContent>
             </Card>
             <CollapsibleContent className="space-y-2">
-              <Card x-chunk="charts-01-chunk-7">
-                <CardHeader className="p-2">
-                  <CardDescription>Shipper Accuracy</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={accuracyChartConfig}
-                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
-                  >
-                    <PieChart>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                      />
-                      <Pie
-                        // label
-                        data={shipperAccuracyChartData}
-                        dataKey="accuracy_count"
-                        nameKey="accuracy_range"
-                      />
-                    </PieChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-              <Card x-chunk="charts-01-chunk-7">
-                <CardHeader className="p-2">
-                  <CardDescription>Consignee Accuracy</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={accuracyChartConfig}
-                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
-                  >
-                    <PieChart>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                      />
-                      <Pie
-                        // label
-                        data={consigneeAccuracyChartData}
-                        dataKey="accuracy_count"
-                        nameKey="accuracy_range"
-                      />
-                    </PieChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-              <Card x-chunk="charts-01-chunk-7">
-                <CardHeader className="p-2">
-                  <CardDescription>Bill to Accuracy</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={accuracyChartConfig}
-                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
-                  >
-                    <PieChart>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                      />
-                      <Pie
-                        // label
-                        data={billtoAccuracyChartData}
-                        dataKey="accuracy_count"
-                        nameKey="accuracy_range"
-                      />
-                    </PieChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-              <Card x-chunk="charts-01-chunk-7">
-                <CardHeader className="p-2">
-                  <CardDescription>Items Accuracy</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={accuracyChartConfig}
-                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
-                  >
-                    <PieChart>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                      />
-                      <Pie
-                        // label
-                        data={itemsAccuracyChartData}
-                        dataKey="accuracy_count"
-                        nameKey="accuracy_range"
-                      />
-                    </PieChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-              <Card x-chunk="charts-01-chunk-7">
-                <CardHeader className="p-2">
-                  <CardDescription>Reference Accuracy</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={accuracyChartConfig}
-                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
-                  >
-                    <PieChart>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                      />
-                      <Pie
-                        // label
-                        data={referenceAccuracyChartData}
-                        dataKey="accuracy_count"
-                        nameKey="accuracy_range"
-                      />
-                    </PieChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-              <Card x-chunk="charts-01-chunk-7">
-                <CardHeader className="p-2">
-                  <CardDescription>
-                    Special Instructions Accuracy
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer
-                    config={accuracyChartConfig}
-                    className="mx-auto aspect-square max-h-[170px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
-                  >
-                    <PieChart>
-                      <ChartTooltip
-                        cursor={false}
-                        content={<ChartTooltipContent hideLabel />}
-                      />
-                      <Pie
-                        // label
-                        data={instrustionsAccuracyChartData}
-                        dataKey="accuracy_count"
-                        nameKey="accuracy_range"
-                      />
-                    </PieChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
+              <AccuracyChart
+                chartName="Shipper Accuracy"
+                accuracyChartData={shipperAccuracyChartData}
+              />
+              <AccuracyChart
+                chartName="Consignee Accuracy"
+                accuracyChartData={consigneeAccuracyChartData}
+              />
+              <AccuracyChart
+                chartName="Bill to Accuracy"
+                accuracyChartData={billtoAccuracyChartData}
+              />
+              <AccuracyChart
+                chartName="Items Accuracy"
+                accuracyChartData={itemsAccuracyChartData}
+              />
+              <AccuracyChart
+                chartName="Reference Accuracy"
+                accuracyChartData={referenceAccuracyChartData}
+              />
+              <AccuracyChart
+                chartName="Special Instructions Accuracy"
+                accuracyChartData={instrustionsAccuracyChartData}
+              />
             </CollapsibleContent>
           </Collapsible>
         </div>

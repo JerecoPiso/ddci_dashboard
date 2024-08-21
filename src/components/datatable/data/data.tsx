@@ -20,4 +20,9 @@ export const statuses = [
     label: "EDITED",
     icon: PlusCircleIcon,
   },
+  {
+    value: "ERROR",
+    label: "ERROR",
+    icon: PlusCircleIcon,
+  },
 ];

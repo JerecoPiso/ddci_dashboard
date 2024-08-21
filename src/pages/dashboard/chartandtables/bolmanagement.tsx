@@ -1,11 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import {
-//   Sheet,
-//   SheetContent,
-//   SheetHeader,
-//   SheetTitle,
-//   SheetTrigger,
-// } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Popover,
@@ -20,20 +13,17 @@ import {
 } from "@/components/ui/chart";
 import { Calendar as CalendarIcon, TriangleAlert } from "lucide-react";
 import { useEffect, useState, useRef, useContext } from "react";
-// import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { getProdDate, setCookie, getSelectedDate, getSelectedClient } from "@/variables/dates";
+import { getProdDate, setCookie, getSelectedDate, getSelectedClient, formatDate, convertSeconds, convertDateTimeString } from "@/utils/dates";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Cookies from "js-cookie";
-import { formatDate, convertSeconds, convertDateTimeString } from "@/utils/date";
 import { Pie, PieChart } from "recharts";
 import { DataTable } from "@/components/datatable/bolmanagement/data-table";
 import { columns } from "@/components/datatable/bolmanagement/columns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BOL, AccuracyData, generateAccuracyData } from "@/variables/bol";
-// import { useNavigate } from "react-router-dom";
 import Loading from "@/components/loading";
 import axios from "axios";
 import ClientSelector from "@/components/ClientSelector";
@@ -48,9 +38,13 @@ interface DocumentSaveDates {
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BolManagement() {
+  const headers = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${Cookies.get("token")}`,
+    },
+  };
   const baseUrl = useContext(BaseUrlContext);
-
-  // const navigate = useNavigate();
   const ranges = ["_025", "_2650", "_51_75", "_76100"];
   const colors = [
     "var(--color-_025)",
@@ -64,11 +58,9 @@ function BolManagement() {
   const [status, setStatus] = useState<string>("ALL");
   const [rowSize, setRowSize] = useState<number>(10);
   const [loading, setLoading] = useState<boolean>(false);
-  // const [bols, setBols] = useState<BOL[]>([]);
   const [client, setClient] = useState<string>(getSelectedClient());
   const [, setClients] = useState<Clients[]>([]);
   const [bols, setBols] = useState<BOL[]>([]);
-
   const hasFetchedData = useRef(false);
   const [accuracyChartData, setAccuracyChartData] = useState<AccuracyData[]>(
     () => generateAccuracyData(ranges, colors)
@@ -172,15 +164,10 @@ AccuracyData[]
           ? `${baseUrl}document/get/${clientName}/${_prod_date}?pageNumber=${page}&pageSize=${rowSize}`
           : `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`
       // const link = `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`
-      const response = await axios.get(link, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-      });
+      const response = await axios.get(link, headers);
       if (response.status === 200) {
         const _bols: BOL[] = [];
-        // console.log(response.data);
+        // console.log(response.data.details);
         if (response.data.details) {
           setPageCount(response.data.details.pageCount);
           response.data.details.list.forEach((el: any) => {
@@ -189,7 +176,7 @@ AccuracyData[]
             const document_save_dates: DocumentSaveDates[] = [];
             let _turnAroundSeconds: number = 0;
             if (Object.keys(el.attributes).length > 0) {
-              console.log(el.attributes)
+              // console.log(el.attributes)
               accuracy_total =
                 ((parseFloat(el.attributes["billto-accuracy"]) +
                   parseFloat(el.attributes["consignee-accuracy"]) +
@@ -271,12 +258,7 @@ AccuracyData[]
       const shipperAccuracy = await axios.post(
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/shipper-accuracy`,
         JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        }
+        headers
       );
       if (shipperAccuracy.status == 200) {
         const _shipper_accuracy = shipperAccuracy.data.details;
@@ -288,12 +270,7 @@ AccuracyData[]
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/consignee-accuracy`,
 
         JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        }
+        headers
       );
       if (consigneeAccuracy.status == 200) {
         // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
@@ -306,12 +283,7 @@ AccuracyData[]
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/billto-accuracy`,
 
         JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        }
+        headers
       );
       if (billtoAccuracy.status == 200) {
         // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
@@ -324,12 +296,7 @@ AccuracyData[]
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/items-accuracy`,
 
         JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        }
+        headers
       );
       if (itemsAccuracy.status == 200) {
         // const values = ["0.00-0.25", "0.26-0.50", "0.51-0.76", "0.76-1.00"];
@@ -342,12 +309,7 @@ AccuracyData[]
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/instructions-lines-accuracy`,
 
         JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        }
+        headers
       );
       if (instructionsAccuracy.status == 200) {
         const _instructions_accuracy = instructionsAccuracy.data.details;
@@ -358,12 +320,7 @@ AccuracyData[]
       const referenceAccuracy = await axios.post(
         `${baseUrl}document/count-documents-by/attribute/${clientName}/${_prod_date}/reference-accuracy`,
         JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        }
+        headers
       );
       if (referenceAccuracy.status == 200) {
         const _reference_accuracy = referenceAccuracy.data.details;
@@ -373,14 +330,8 @@ AccuracyData[]
       }
       const overallAccuracy = await axios.post(
         `${baseUrl}document/count-documents-by/accuracy/${clientName}/${_prod_date}`,
-
         JSON.stringify(data),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Cookies.get("token")}`,
-          },
-        }
+        headers
       );
       if (overallAccuracy.status == 200) {
         const _overall_accuracy = overallAccuracy.data.details;
@@ -446,14 +397,6 @@ AccuracyData[]
     const __clients = JSON.parse(Cookies.get("_clients") || "");
     return __clients[0];
   };
-  // const setCookie = (cookieValue: string) => {
-  //   const currentDate = new Date();
-  //   const expirationDate = new Date(currentDate.getTime() + 1 * 60 * 60 * 1000);
-  //   Cookies.set("activeClient", cookieValue, {
-  //     path: "/",
-  //     expires: expirationDate,
-  //   });
-  // }
   useEffect(() => {
     if (Cookies.get("token")) {
       const __clients = JSON.parse(Cookies.get("_clients") || "");
