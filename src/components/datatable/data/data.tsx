@@ -16,8 +16,8 @@ export const statuses = [
     icon: CheckIcon,
   },
   {
-    value: "EDITED",
-    label: "EDITED",
+    value: "VERIFIED",
+    label: "VERIFIED",
     icon: PlusCircleIcon,
   },
   {

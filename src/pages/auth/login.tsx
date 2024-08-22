@@ -22,11 +22,12 @@ import { toast } from "sonner";
 import Loading from "@/components/loading";
 import { BaseUrlContext } from "@/App";
 import { useNavigate } from "react-router-dom";
-import { TriangleAlert } from "lucide-react";
+import { TriangleAlert, Eye, EyeOff } from "lucide-react";
 function Login() {
   const baseUrl = useContext(BaseUrlContext);
   const navigate = useNavigate();
   const hasLoad = useRef(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [islogin, setIsLogin] = useState<boolean>(false);
   const [user, setUser] = useState<User>({
     // username: "dashboard",
@@ -44,15 +45,21 @@ function Login() {
       [name]: value,
     }));
   };
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
   const login = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLogin(true);
     try {
       const response = await axios.post(`${baseUrl}credential/login`, user);
       if (response.status == 200) {
-        setCookie("token", response.data.details.token)
-        setCookie("_clients", JSON.stringify(response.data.details.clients))
-        setCookie("_authorities", JSON.stringify(response.data.details.authorities))
+        setCookie("token", response.data.details.token);
+        setCookie("_clients", JSON.stringify(response.data.details.clients));
+        setCookie(
+          "_authorities",
+          JSON.stringify(response.data.details.authorities)
+        );
         navigate("/dashboard/");
       }
       setIsLogin(false);
@@ -105,14 +112,25 @@ function Login() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                name="password"
-                value={user.password}
-                onChange={handleChange}
-                required
-              />
+              <div className="flex items-center">
+                <Input
+                  id="password"
+                  type={!showPassword ? "password" : "text"}
+                  name="password"
+                  value={user.password}
+                  onChange={handleChange}
+                  required
+                  className="border-r pr-10"
+                />
+                {!showPassword ? (
+                  <Eye className="-ml-8" onClick={() => handleShowPassword()} />
+                ) : (
+                  <EyeOff
+                    className="-ml-8"
+                    onClick={() => handleShowPassword()}
+                  />
+                )}
+              </div>
             </div>
           </CardContent>
           <CardFooter>

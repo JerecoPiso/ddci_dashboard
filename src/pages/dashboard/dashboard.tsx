@@ -273,20 +273,20 @@ function Dashboard() {
       // console.log(response.data.details);
       const _values = response.data.details;
       const _totalReceive =
-        _values.EDITED +
+        _values.VERIFIED +
         _values.ERROR +
         _values.OCRED +
         _values.REJECTED +
         _values.UPLOADED;
       setTotalReceive(
-        _values.EDITED +
+        _values.VERIFIED +
           _values.ERROR +
           _values.OCRED +
           _values.REJECTED +
           _values.UPLOADED
       );
       setCounts({
-        billed: _values.EDITED,
+        billed: _values.VERIFIED,
         rejects: _values.REJECTED,
         accuracy: _values.ACCURACY * 100,
         receives: _totalReceive,
@@ -298,14 +298,14 @@ function Dashboard() {
     if (yesterday.data.details) {
       const _values = yesterday.data.details;
       const _totalReceive =
-        _values.EDITED +
+        _values.VERIFIED +
         _values.ERROR +
         _values.OCRED +
         _values.REJECTED +
         _values.UPLOADED;
       // setPreviousTotalReceive(_values.EDITED + _values.ERROR + _values.OCRED + _values.REJECTED + _values.UPLOADED);
       setPreviousDayCounts({
-        billed: _values.EDITED,
+        billed: _values.VERIFIED,
         rejects: _values.REJECTED,
         accuracy: _values.ACCURACY * 100,
         receives: _totalReceive,
@@ -316,7 +316,7 @@ function Dashboard() {
     }
     // hasFetched.current = false;
   };
-  const getBOL = async () => {
+  const getAccuracies = async () => {
     const _prod_date = getProdDate(date);
     const clientName = client ? client : getDefaultClient();
     const data = [
@@ -504,7 +504,7 @@ function Dashboard() {
     if (!hasFetched.current) {
       getHourlyArrival();
       documentCounts();
-      getBOL();
+      getAccuracies();
       hasFetched.current = true;
       setLoading(false);
     }
@@ -807,9 +807,9 @@ function Dashboard() {
                   <div className="text-xs text-muted-foreground">Uploaded</div>
                   <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
                     {counts.uploaded}
-                    <span className="text-xs font-normal text-muted-foreground">
+                    {/* <span className="text-xs font-normal text-muted-foreground">
                       / {totalReceive}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <Separator orientation="vertical" className="mx-2 h-10 w-px" />
@@ -817,9 +817,9 @@ function Dashboard() {
                   <div className="text-xs text-muted-foreground">Ocred</div>
                   <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
                     {counts.ocred}
-                    <span className="text-xs font-normal text-muted-foreground">
+                    {/* <span className="text-xs font-normal text-muted-foreground">
                       / {totalReceive}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <Separator orientation="vertical" className="mx-2 h-10 w-px" />
@@ -827,9 +827,9 @@ function Dashboard() {
                   <div className="text-xs text-muted-foreground">Billed</div>
                   <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
                     {counts.billed}
-                    <span className="text-xs font-normal text-muted-foreground">
+                    {/* <span className="text-xs font-normal text-muted-foreground">
                       / {totalReceive}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <Separator orientation="vertical" className="mx-2 h-10 w-px" />
@@ -837,9 +837,9 @@ function Dashboard() {
                   <div className="text-xs text-muted-foreground">Error</div>
                   <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
                     {counts.error}
-                    <span className="text-xs font-normal text-muted-foreground">
+                    {/* <span className="text-xs font-normal text-muted-foreground">
                       / {totalReceive}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <Separator orientation="vertical" className="mx-2 h-10 w-px" />
@@ -847,9 +847,9 @@ function Dashboard() {
                   <div className="text-xs text-muted-foreground">Rejected</div>
                   <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
                     {counts.rejects}
-                    <span className="text-xs font-normal text-muted-foreground">
+                    {/* <span className="text-xs font-normal text-muted-foreground">
                       / {totalReceive}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </div>

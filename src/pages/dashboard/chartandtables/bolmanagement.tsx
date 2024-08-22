@@ -14,7 +14,15 @@ import {
 import { Calendar as CalendarIcon, TriangleAlert } from "lucide-react";
 import { useEffect, useState, useRef, useContext } from "react";
 import { Button } from "@/components/ui/button";
-import { getProdDate, setCookie, getSelectedDate, getSelectedClient, formatDate, convertSeconds, convertDateTimeString } from "@/utils/dates";
+import {
+  getProdDate,
+  setCookie,
+  getSelectedDate,
+  getSelectedClient,
+  formatDate,
+  convertSeconds,
+  convertDateTimeString,
+} from "@/utils/dates";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -77,12 +85,11 @@ function BolManagement() {
   const [itemsAccuracyChartData, setItemsAccuracyChartData] = useState<
     AccuracyData[]
   >(() => generateAccuracyData(ranges, colors));
-  const [instrustionsAccuracyChartData, setInstrustionsAccuracyChartData] = useState<
-  AccuracyData[]
->(() => generateAccuracyData(ranges, colors));
-const [referenceAccuracyChartData, setReferenceAccuracyChartData] = useState<
-AccuracyData[]
->(() => generateAccuracyData(ranges, colors));
+  const [instrustionsAccuracyChartData, setInstrustionsAccuracyChartData] =
+    useState<AccuracyData[]>(() => generateAccuracyData(ranges, colors));
+  const [referenceAccuracyChartData, setReferenceAccuracyChartData] = useState<
+    AccuracyData[]
+  >(() => generateAccuracyData(ranges, colors));
   const accuracyChartConfig = {
     visitors: {
       label: "Counts",
@@ -135,14 +142,13 @@ AccuracyData[]
           i === index ? { ...data, accuracy_count: total } : data
         )
       );
-    }else if (type === "instructions") {
+    } else if (type === "instructions") {
       setInstrustionsAccuracyChartData((prevChartData) =>
         prevChartData.map((data, i) =>
           i === index ? { ...data, accuracy_count: total } : data
         )
       );
-    }
-    else if (type === "reference") {
+    } else if (type === "reference") {
       setReferenceAccuracyChartData((prevChartData) =>
         prevChartData.map((data, i) =>
           i === index ? { ...data, accuracy_count: total } : data
@@ -150,92 +156,10 @@ AccuracyData[]
       );
     }
   };
-  const getBOL = async (api: string) => {
+  const getAccuracies = async () => {
     try {
-      setLoading(true);
       const _prod_date = getProdDate(date);
       const clientName = client ? client : getDefaultClient();
-      // const link: string =
-      //   api === "getDocument"
-      //     ? `${baseUrl}document/get/${clientName}/${_prod_date}/${page}/${rowSize}`
-      //     : `${baseUrl}document/get/${clientName}/${_prod_date}/${page}/${rowSize}?status=${status}`;
-      const link: string =
-        api === "getDocument"
-          ? `${baseUrl}document/get/${clientName}/${_prod_date}?pageNumber=${page}&pageSize=${rowSize}`
-          : `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`
-      // const link = `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`
-      const response = await axios.get(link, headers);
-      if (response.status === 200) {
-        const _bols: BOL[] = [];
-        // console.log(response.data.details);
-        if (response.data.details) {
-          setPageCount(response.data.details.pageCount);
-          response.data.details.list.forEach((el: any) => {
-            let accuracy_total: number = 0;
-            let elapse: number = 0;
-            const document_save_dates: DocumentSaveDates[] = [];
-            let _turnAroundSeconds: number = 0;
-            if (Object.keys(el.attributes).length > 0) {
-              // console.log(el.attributes)
-              accuracy_total =
-                ((parseFloat(el.attributes["billto-accuracy"]) +
-                  parseFloat(el.attributes["consignee-accuracy"]) +
-                  parseFloat(el.attributes["instructions-lines-accuracy"]) +
-                  parseFloat(el.attributes["items-accuracy"]) +
-                  parseFloat(el.attributes["reference-accuracy"]) +
-                  parseFloat(el.attributes["shipper-accuracy"])) /
-                  6) *
-                100;
-              elapse =
-                parseFloat(el.attributes["edit-elapse"]) +
-                parseFloat(el.attributes["ocr-elapse"]) +
-                parseFloat(el.attributes["upload-elapse"]);
-            }
-            el.processes.forEach((e: any) => {
-              if (e.name === "DOCUMENT_SAVE") {
-                // console.log(el.createdAt)
-                // console.log(e.endTime)
-                document_save_dates.push(e.endTime);
-              }
-            });
-            if (document_save_dates.length > 0) {
-              // console.log(document_save_dates)
-              const dates: Date[] = document_save_dates.map(
-                (dateTime) => new Date(dateTime.toString())
-              );
-              const maxDate: Date = new Date(
-                Math.max(...dates.map((date) => date.getTime()))
-              );
-              const _createdAt = new Date(el.createdAt);
-  
-              // const _processEndTime = new Date(maxDate.toISOString());
-              const _processEndTime = new Date(convertDateTimeString(maxDate.toString()));
-
-              _turnAroundSeconds =
-                _processEndTime.getTime() - _createdAt.getTime();
-            }
-            _bols.push({
-              document: el.document,
-              client: el.client,
-              type: el.type,
-              production: el.production,
-              status: el.status,
-              createdat: formatDate(el.createdAt),
-              accuracy: accuracy_total.toFixed(2),
-              elapse: elapse > 0 ? convertSeconds(elapse) : "0",
-              turnaroundtime:
-                _turnAroundSeconds > 0
-                  ? convertSeconds(_turnAroundSeconds / 1000)
-                  : "0",
-              priority: el.priority > 0 ? "Yes" : "No",
-            });
-          });
-        } else {
-          setPage(1);
-          setPageCount(0);
-        }
-        setBols(_bols);
-      }
       const data = [
         {
           minValue: 0.0,
@@ -339,6 +263,116 @@ AccuracyData[]
           updateAccuracy(i, "accuracy", _overall_accuracy[values[i]]);
         }
       }
+    } catch (err: any) {
+      console.log(err);
+      toast("Error!", {
+        style: { color: "red", backgroundColor: "#ffeae4" },
+        className: "my-classname",
+        description: "An error has occured",
+        duration: 3000,
+        icon: <TriangleAlert className="w-5 h-5" />,
+        closeButton: false,
+      });
+      setLoading(false);
+      // navigate("/");
+      // console.log(err);
+      // if (err.response.status === 403) {
+      //   Cookies.remove("_clients");
+      //   Cookies.remove("token");
+      //   navigate("/");
+      // }
+    }
+  };
+  const getBOL = async (api: string) => {
+    try {
+      setLoading(true);
+      const _prod_date = getProdDate(date);
+      const clientName = client ? client : getDefaultClient();
+      // const link: string =
+      //   api === "getDocument"
+      //     ? `${baseUrl}document/get/${clientName}/${_prod_date}/${page}/${rowSize}`
+      //     : `${baseUrl}document/get/${clientName}/${_prod_date}/${page}/${rowSize}?status=${status}`;
+      const link: string =
+        api === "getDocument"
+          ? `${baseUrl}document/get/${clientName}/${_prod_date}?pageNumber=${page}&pageSize=${rowSize}`
+          : `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`;
+      // const link = `${baseUrl}document/get/${clientName}/${_prod_date}?status=${status}&pageNumber=${page}&pageSize=${rowSize}`
+      const response = await axios.get(link, headers);
+      if (response.status === 200) {
+        const _bols: BOL[] = [];
+        if (response.data.details) {
+          // console.log(response.data.details)
+          setPageCount(response.data.details.pageCount);
+          response.data.details.list.forEach((el: any) => {
+            let accuracy_total: number = 0;
+            let elapse: number = 0;
+            const document_save_dates: DocumentSaveDates[] = [];
+            let _turnAroundSeconds: number = 0;
+            if (Object.keys(el.attributes).length > 0) {
+              // console.log(el.attributes)
+              accuracy_total =
+                ((parseFloat(el.attributes["billto-accuracy"]) +
+                  parseFloat(el.attributes["consignee-accuracy"]) +
+                  parseFloat(el.attributes["instructions-lines-accuracy"]) +
+                  parseFloat(el.attributes["items-accuracy"]) +
+                  parseFloat(el.attributes["reference-accuracy"]) +
+                  parseFloat(el.attributes["shipper-accuracy"])) /
+                  6) *
+                100;
+              elapse =
+                parseFloat(el.attributes["edit-elapse"]) +
+                parseFloat(el.attributes["ocr-elapse"]) +
+                parseFloat(el.attributes["upload-elapse"]);
+            }
+            el.processes.forEach((e: any) => {
+              if (e.name === "DOCUMENT_SAVE") {
+                // console.log(el.createdAt)
+                // console.log(e.endTime)
+                document_save_dates.push(e.endTime);
+              }
+            });
+            if (document_save_dates.length > 0) {
+              // console.log(document_save_dates)
+              const dates: Date[] = document_save_dates.map(
+                (dateTime) => new Date(dateTime.toString())
+              );
+              const maxDate: Date = new Date(
+                Math.max(...dates.map((date) => date.getTime()))
+              );
+              const _createdAt = new Date(el.createdAt);
+
+              // const _processEndTime = new Date(maxDate.toISOString());
+              const _processEndTime = new Date(
+                convertDateTimeString(maxDate.toString())
+              );
+
+              _turnAroundSeconds =
+                _processEndTime.getTime() - _createdAt.getTime();
+            }
+            _bols.push({
+              document: el.document,
+              client: el.client,
+              type: el.type,
+              production: el.production,
+              status: el.status,
+              createdat: formatDate(el.createdAt),
+              accuracy: accuracy_total.toFixed(2),
+              elapse: elapse > 0 ? convertSeconds(elapse) : "0",
+              turnaroundtime:
+                _turnAroundSeconds > 0
+                  ? convertSeconds(_turnAroundSeconds / 1000)
+                  : "0",
+              priority: el.priority > 0 ? "Yes" : "No",
+              pages: el.pages
+            });
+          });
+        } else {
+          setPage(1);
+          setPageCount(0);
+        }
+        setBols(_bols);
+      }
+
       hasFetchedData.current = false;
       setLoading(false);
     } catch (err: any) {
@@ -346,12 +380,12 @@ AccuracyData[]
       toast("Error!", {
         style: { color: "red", backgroundColor: "#ffeae4" },
         className: "my-classname",
-        description: 'An error has occured',
+        description: "An error has occured",
         duration: 3000,
         icon: <TriangleAlert className="w-5 h-5" />,
         closeButton: false,
       });
-      setLoading(false)
+      setLoading(false);
       // navigate("/");
       // console.log(err);
       // if (err.response.status === 403) {
@@ -386,12 +420,12 @@ AccuracyData[]
   };
   const handleClient = (_client: string) => {
     hasFetchedData.current = false;
-    setCookie("_selectedClient", _client)
+    setCookie("_selectedClient", _client);
     setClient(_client);
   };
   const handleDate = (day: any) => {
     setDate(day ?? new Date());
-    setCookie("_selectedDate", day ?? new Date())
+    setCookie("_selectedDate", day ?? new Date());
   };
   const getDefaultClient = () => {
     const __clients = JSON.parse(Cookies.get("_clients") || "");
@@ -406,9 +440,9 @@ AccuracyData[]
       });
       setClients(clientsList);
       if (client == "") {
-        if(Cookies.get("_selectedClient")){
-          setClient(Cookies.get("_selectedClient") || '')
-        }else{
+        if (Cookies.get("_selectedClient")) {
+          setClient(Cookies.get("_selectedClient") || "");
+        } else {
           setClient(__clients[0]);
         }
       }
@@ -418,6 +452,7 @@ AccuracyData[]
   }, [client]);
   useEffect(() => {
     if (hasFetchedData.current === false) {
+      getAccuracies();
       getBOL(status === "ALL" ? "getDocument" : "getDocumentByStatus");
       hasFetchedData.current = true;
     }
@@ -434,7 +469,9 @@ AccuracyData[]
     elapse: item.elapse,
     turnaroundtime: item.turnaroundtime,
     priority: item.priority,
+    pages: item.pages
   }));
+
   return (
     <Card x-chunk="dashboard-06-chunk-0">
       <CardHeader>
@@ -481,7 +518,7 @@ AccuracyData[]
         ) : (
           ""
         )}
-        <Tabs defaultValue="accuracies">
+        <Tabs defaultValue="table">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="accuracies">Accuracies</TabsTrigger>
             <TabsTrigger value="table">Table</TabsTrigger>
@@ -705,6 +742,7 @@ AccuracyData[]
                     pageCount={pageCount}
                     pageNumber={page}
                     onFilterStatus={onFilterStatus}
+                  
                   />
                 </div>
               </CardContent>

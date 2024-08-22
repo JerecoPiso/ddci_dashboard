@@ -11,6 +11,7 @@ export const bolSchema = z.object({
   accuracy: z.string(),
   priority: z.string(),
   createdat: z.string(),
+  pages: z.number()
 })
 export const userSchema = z.object({
   

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { TriangleAlert, CheckCircleIcon } from "lucide-react";
+import { TriangleAlert, CheckCircleIcon, Eye, EyeOff } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +42,7 @@ interface Users {
 }
 function UserManagement() {
   const baseUrl = useContext(BaseUrlContext);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const hasFetchedData = useRef(false);
   const roles = [
@@ -50,6 +51,8 @@ function UserManagement() {
     "ROLE_DASHBOARD",
     "ROLE_CLIENT",
     "ROLE_DOCUMENT",
+    "ROLE_SYSTEM",
+    // "ROLE_QC",
   ];
   const [openAddModal, setOpenAddModal] = useState(false);
   const [archive, setArchive] = useState<boolean>(false);
@@ -69,15 +72,12 @@ function UserManagement() {
   });
   const getUsers = async () => {
     hasFetchedData.current = true;
-    const response = await axios.get(
-      `${baseUrl}credential/list`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-      }
-    );
+    const response = await axios.get(`${baseUrl}credential/list`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    });
     if (response.status === 200) {
       // console.log(response.data.details);
       setUsers(response.data.details);
@@ -85,15 +85,12 @@ function UserManagement() {
   };
   const getClients = async () => {
     hasFetchedData.current = true;
-    const response = await axios.get(
-      `${baseUrl}client/get-active`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-      }
-    );
+    const response = await axios.get(`${baseUrl}client/get-active`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    });
     if (response.status === 200) {
       setClients(response.data.details);
     }
@@ -119,6 +116,9 @@ function UserManagement() {
     } catch (err: any) {
       ToastError(JSON.stringify(err.response.data.details));
     }
+  };
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword);
   };
   const handleDelete = (id: any, username: any) => {
     setUserinfo((prevUserinfo) => ({
@@ -232,16 +232,12 @@ function UserManagement() {
         clients: selectedClients,
       };
       try {
-        const response = await axios.post(
-          `${baseUrl}credential/create`,
-          data,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${Cookies.get("token")}`,
-            },
-          }
-        );
+        const response = await axios.post(`${baseUrl}credential/create`, data, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         if (response.status === 200) {
           ToastSuccess(response.data.message);
 
@@ -281,16 +277,12 @@ function UserManagement() {
         clients: selectedClients,
       };
       try {
-        const response = await axios.post(
-          `${baseUrl}credential/update`,
-          data,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${Cookies.get("token")}`,
-            },
-          }
-        );
+        const response = await axios.post(`${baseUrl}credential/update`, data, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("token")}`,
+          },
+        });
         if (response.status === 200) {
           ToastSuccess(response.data.message);
           getUsers();
@@ -326,7 +318,7 @@ function UserManagement() {
       getUsers();
       getClients();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [users]);
   return (
     <div>
@@ -366,7 +358,7 @@ function UserManagement() {
                 <div className="md:col-span-1 col-span-2">
                   <Label>Username</Label>
                   <Input
-                    type="text"
+                   type="text"
                     value={userinfo.username}
                     name="username"
                     onChange={handleChange}
@@ -419,13 +411,27 @@ function UserManagement() {
                 </div>
                 <div className="md:col-span-1 col-span-2">
                   <Label>Password</Label>
-                  <Input
-                    type="password"
-                    value={userinfo.password}
-                    name="password"
-                    onChange={handleChange}
-                    placeholder="Password"
-                  />
+                  <div className="flex items-center">
+                    <Input
+                      type={!showPassword ? "password" : "text"}
+                      value={userinfo.password}
+                      name="password"
+                      onChange={handleChange}
+                      placeholder="Password"
+                      className="pr-10"
+                    />
+                    {!showPassword ? (
+                      <Eye
+                        className="-ml-8"
+                        onClick={() => handleShowPassword()}
+                      />
+                    ) : (
+                      <EyeOff
+                        className="-ml-8"
+                        onClick={() => handleShowPassword()}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="md:col-span-1 col-span-2">
                   <Label>Authorities</Label>

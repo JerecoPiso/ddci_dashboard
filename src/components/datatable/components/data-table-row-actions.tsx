@@ -1,24 +1,22 @@
-
-import { DotsHorizontalIcon } from "@radix-ui/react-icons"
-import { Button } from "@/components/ui/button"
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-interface Action{
-  onDelete: () => void,
-  onUpdate: () => void
-
-  }
-export function DataTableRowActions({onDelete, onUpdate}: Action) {
+} from "@/components/ui/dropdown-menu";
+interface Action {
+  onDelete: () => void;
+  onUpdate: () => void;
+}
+export function DataTableRowActions({ onDelete, onUpdate }: Action) {
   const handleDelete = () => {
-    onDelete()
-  }
+    onDelete();
+  };
   const handleUpdate = () => {
-    onUpdate()
-  }
+    onUpdate();
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,5 +33,5 @@ export function DataTableRowActions({onDelete, onUpdate}: Action) {
         <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

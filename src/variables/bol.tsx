@@ -8,7 +8,8 @@ export type BOL = {
   accuracy: string,
   elapse: string,
   turnaroundtime: string,
-  priority: string
+  priority: string,
+  pages: number
 };
 export type AccuracyData = {
   index: number;

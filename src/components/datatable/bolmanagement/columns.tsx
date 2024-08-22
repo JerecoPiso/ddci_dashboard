@@ -1,22 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ColumnDef } from "@tanstack/react-table";
-import { statuses } from "../data/data"
+import { statuses } from "../data/data";
 import { Bol } from "@/components/datatable/data/schemas";
 import { DataTableColumnHeader } from "../components/data-table-column-header";
-import { Badge } from "@/components/ui/badge"
-// import { DataTableRowActions } from "./data-table-row-actions";
-// const haha = ["document", "type", "production"]
-
-// haha.map(e =>{ 
-//   return(
-//     <div>
-//       fdsdfsdf {e}
-//     </div>
-//   )
-// })
-// interface Task {
-//   // name: string
-// }
+import { Badge } from "@/components/ui/badge";
 export const columns: ColumnDef<Bol>[] = [
   {
     accessorKey: "document",
@@ -38,7 +25,7 @@ export const columns: ColumnDef<Bol>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
     ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("type")}</div>,
+    cell: ({ row }) => <div className="w-[100px]">{row.getValue("type")}</div>,
     enableSorting: false,
   },
   {
@@ -57,6 +44,21 @@ export const columns: ColumnDef<Bol>[] = [
     },
   },
   {
+    accessorKey: "pages",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Pages" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[500px] truncate font-medium">
+            {row.getValue("pages")}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "status",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
@@ -64,22 +66,21 @@ export const columns: ColumnDef<Bol>[] = [
     cell: ({ row }) => {
       const status = statuses.find(
         (status) => status.value === row.getValue("status")
-      )
+      );
       if (!status) {
-        return null
+        return null;
       }
       return (
         <div className="flex items-center">
           <span>{row.getValue("status")}</span>
         </div>
-      )
+      );
     },
     filterFn: (row, id, value) => {
-
-      return value.includes(row.getValue(id))
+      return value.includes(row.getValue(id));
     },
   },
-  
+
   {
     accessorKey: "elapse",
     header: ({ column }) => (
@@ -134,7 +135,11 @@ export const columns: ColumnDef<Bol>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("priority") == 1 ? <Badge variant="outline">{row.getValue("priority")}</Badge> : <Badge variant="destructive">{row.getValue("priority")}</Badge>}
+            {row.getValue("priority") == 1 ? (
+              <Badge variant="outline">{row.getValue("priority")}</Badge>
+            ) : (
+              <Badge variant="destructive">{row.getValue("priority")}</Badge>
+            )}
           </span>
         </div>
       );
@@ -155,5 +160,9 @@ export const columns: ColumnDef<Bol>[] = [
       );
     },
   },
+  {
+    id: "actions",
   
+    // cell: () => <DataTableRowActions />,
+  },
 ];

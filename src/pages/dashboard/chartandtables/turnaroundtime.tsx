@@ -268,7 +268,7 @@ function TurnAroundTime() {
       <CardHeader>
         <CardTitle>
           <div className="flex md:flex-row flex-col md:justify-between justify-normal md:items-center items-start gap-2">
-            <p>Turn Arround Time</p>
+            <p>Turn Around Time</p>
             <div className="flex items-center gap-x-1">
               <Popover>
                 <PopoverTrigger asChild>
