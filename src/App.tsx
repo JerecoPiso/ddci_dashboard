@@ -13,10 +13,10 @@ import Dashboard from "./pages/dashboard/dashboard";
 import Admin from "./pages/dashboard/admin";
 import { createContext } from "react";
 //local
-const api = "http://192.168.23.84:8007/ddcic/api/v1/"
+// const api = "http://192.168.23.84:8007/ddcic/api/v1/"
 
 //server
-// const api = "http://210.213.193.4:8007/ddcic/api/v1/"
+const api = "http://210.213.193.4:8007/ddcic/api/v1/"
 export const BaseUrlContext = createContext(api);
 function App() {
   return (

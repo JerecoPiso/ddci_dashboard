@@ -39,6 +39,8 @@ interface Users {
   password: string;
   middlename?: string;
   suffix?: string;
+  client: string;
+  authorities: string;
 }
 function UserManagement() {
   const baseUrl = useContext(BaseUrlContext);
@@ -69,6 +71,8 @@ function UserManagement() {
     contactNumber: "",
     emailAddress: "",
     password: "",
+    client: "",
+    authorities: "",
   });
   const getUsers = async () => {
     hasFetchedData.current = true;
@@ -79,8 +83,34 @@ function UserManagement() {
       },
     });
     if (response.status === 200) {
-      // console.log(response.data.details);
-      setUsers(response.data.details);
+      const _users: Users[] = [];
+      console.log(response.data.details);
+      response.data.details.forEach(
+        (el: {
+          id: any;
+          username: any;
+          lastname: any;
+          firstname: any;
+          contactNumber: any;
+          emailAddress: any;
+          password: any;
+          clients: any;
+          athorities: any;
+        }) => {
+          _users.push({
+            id: el.id,
+            username: el.username,
+            lastname: el.lastname,
+            firstname: el.firstname,
+            contactNumber: el.contactNumber,
+            emailAddress: el.emailAddress,
+            password: el.password,
+            client: el.clients.toString(),
+            authorities: el.athorities.toString(),
+          });
+        }
+      );
+      setUsers(_users);
     }
   };
   const getClients = async () => {
@@ -142,6 +172,9 @@ function UserManagement() {
       newUserinfo.firstname = values.firstname;
       newUserinfo.contactNumber = values.contactNumber;
       newUserinfo.emailAddress = values.emailAddress;
+      setSelectedAuthorities(values.authorities)
+      setSelectedClients(values.client)
+      // console.log(values.authorities)
     }
     setUserinfo(newUserinfo);
     setOpenEditModal(true);
@@ -173,6 +206,10 @@ function UserManagement() {
   const handleAddUser = () => {
     setOpenAddModal(true);
   };
+  const handleEditClient = async () => {
+    await getUsers();
+  };
+
   // Generic change handler
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -304,6 +341,8 @@ function UserManagement() {
       contactNumber: "",
       emailAddress: "",
       password: "",
+      client: "",
+      authorities: "",
     });
   };
   useEffect(() => {
@@ -358,7 +397,7 @@ function UserManagement() {
                 <div className="md:col-span-1 col-span-2">
                   <Label>Username</Label>
                   <Input
-                   type="text"
+                    type="text"
                     value={userinfo.username}
                     name="username"
                     onChange={handleChange}
@@ -589,11 +628,13 @@ function UserManagement() {
         </Dialog>
         <CardContent>
           <DataTable
+            clients={clients}
             data={users}
             columns={columns}
             onDelete={handleDelete}
             onUpdate={handleUpdate}
             addUser={handleAddUser}
+            updateClient={handleEditClient}
           />
         </CardContent>
       </Card>

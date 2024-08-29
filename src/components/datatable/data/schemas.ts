@@ -22,6 +22,7 @@ export const userSchema = z.object({
   middlename: z.string().optional() ,
   suffix: z.string().optional() ,
   contactNumber: z.string(),
+  client: z.string()
 })
 export type Bol = z.infer<typeof bolSchema>
 export type User = z.infer<typeof userSchema>

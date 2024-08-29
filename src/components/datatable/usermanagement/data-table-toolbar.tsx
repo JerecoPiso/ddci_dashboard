@@ -3,21 +3,27 @@ import { Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "@/components/datatable/components/data-table-view-options";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, EditIcon } from "lucide-react";
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   addUser: () => void;
+  editClient: () => void
 }
 export function DataTableToolbar<TData>({
   table,
-  addUser
+  addUser,
+  editClient
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
   const handleAddUser = () =>{
    addUser()
   }
+  const handleEditClient = () =>{
+    editClient()
+  }
   return (
     <div className="flex items-center justify-between">
+      
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder="Filter lastname..."
@@ -41,6 +47,8 @@ export function DataTableToolbar<TData>({
         )}
       </div>
       <Button onClick={ handleAddUser}  className="h-[32px] px-3 bg-transparent hover:text-white dark:hover:text-slate-800 dark:text-slate-100 text-slate-800 border rounded-sm mr-1"><PlusCircle className="h-5 w-5" /></Button >
+      <Button onClick={ handleEditClient}  className="h-[32px] px-3 bg-transparent hover:text-white dark:hover:text-slate-800 dark:text-slate-100 text-slate-800 border rounded-sm mr-1"><EditIcon className="h-5 w-5" /></Button >
+    
       <DataTableViewOptions table={table} />
     </div>
   );
