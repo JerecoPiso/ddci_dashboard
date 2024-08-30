@@ -177,7 +177,7 @@ export function DataTable<TData, TValue>({
       <DataTableToolbar
         table={table}
         addUser={handleAddUser}
-        editClient={() => setOpenEditModal(true)}
+        editClient={() => table.getSelectedRowModel().rows.length > 0 ?  setOpenEditModal(true) :  ToastError("Please select user/s to update client!")}
       />
       <Dialog open={openEditModal} onOpenChange={setOpenEditModal}>
         <DialogContent className="sm:max-w-[568px]">
