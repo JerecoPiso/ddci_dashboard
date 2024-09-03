@@ -32,7 +32,7 @@ function ClientSelector({ onClientChange, activeClient }: Clients) {
     setClient(activeClient);
   }, [activeClient]);
   useEffect(() => {
-    if (Cookies.get("token")) {
+    if (Cookies.get("token") && Cookies.get("_clients")) {
       const __clients = JSON.parse(Cookies.get("_clients") || "");
       const clientsList: Clients[] = [];
       __clients.forEach((el: any) => {
