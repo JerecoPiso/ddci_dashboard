@@ -399,7 +399,16 @@ function BolManagement() {
   };
   const simulateSave = async () => {
     const clientName = client ? client : getDefaultClient();
-    await axios.patch(`${baseUrl}system/simulate-save/${clientName}`);
+    await axios.patch(
+      `${baseUrl}system/simulate-save/${clientName}`,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      }
+    );
   };
   const filterChange = (filter: string) => {
     console.log(filter);
