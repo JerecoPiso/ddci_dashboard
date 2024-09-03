@@ -55,6 +55,7 @@ interface DataTableProps<TData, TValue> {
   onFilterStatus: (status: string) => void;
   pageCount: number;
   pageNumber: number;
+  clientName: string
 }
 export function DataTable<TData, TValue>({
   columns,
@@ -64,6 +65,7 @@ export function DataTable<TData, TValue>({
   pageCount,
   pageNumber,
   onFilterStatus,
+  clientName
 }: DataTableProps<TData, TValue>) {
   const baseUrl = useContext(BaseUrlContext);
   const [roles, setRoles] = useState<string>();
@@ -114,12 +116,12 @@ export function DataTable<TData, TValue>({
   const handleViewBol = async (values: any, ifChangeImage: boolean) => {
     setPages(Number(values.pages));
     setSelectedValues(values);
-    setImage(await getImage(baseUrl, values.document, currentPage));
+    setImage(await getImage(baseUrl, values.document,  clientName, currentPage));
     // if next or previous image do not toggle the sheet for viewing the bol and do not re get the datas of ocred and verified
     if (!ifChangeImage) {
       try {
         setOcredData(
-          await getOcrVerifiedData(baseUrl, "get-ocr-data", values.document)
+          await getOcrVerifiedData(baseUrl, "get-ocr-data", values.document, clientName)
         );
       } catch (err) {
         setOcredData({});
@@ -130,7 +132,8 @@ export function DataTable<TData, TValue>({
           await getOcrVerifiedData(
             baseUrl,
             "get-verified-data",
-            values.document
+            values.document,
+            clientName
           )
         );
       } catch (err) {

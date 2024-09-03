@@ -172,8 +172,9 @@ function UserManagement() {
       newUserinfo.firstname = values.firstname;
       newUserinfo.contactNumber = values.contactNumber;
       newUserinfo.emailAddress = values.emailAddress;
-      setSelectedAuthorities(values.authorities)
-      setSelectedClients(values.client)
+      console.log(values.authorities)
+      setSelectedAuthorities(values.authorities.split(","))
+      setSelectedClients(values.client.split(","))
       // console.log(values.authorities)
     }
     setUserinfo(newUserinfo);
@@ -313,6 +314,7 @@ function UserManagement() {
         authorities: selectedAuthorities,
         clients: selectedClients,
       };
+      // console.log(data)
       try {
         const response = await axios.post(`${baseUrl}credential/update`, data, {
           headers: {

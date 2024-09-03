@@ -363,7 +363,7 @@ function BolManagement() {
                   ? convertSeconds(_turnAroundSeconds / 1000)
                   : "0",
               priority: el.priority > 0 ? "Yes" : "No",
-              pages: el.pages
+              pages: el.pages,
             });
           });
         } else {
@@ -428,8 +428,10 @@ function BolManagement() {
     setCookie("_selectedDate", day ?? new Date());
   };
   const getDefaultClient = () => {
-    const __clients = JSON.parse(Cookies.get("_clients") || "");
-    return __clients[0];
+    if (Cookies.get("_clients")) {
+      const __clients = JSON.parse(Cookies.get("_clients") || "");
+      return __clients[0];
+    }
   };
   useEffect(() => {
     if (Cookies.get("token")) {
@@ -447,7 +449,6 @@ function BolManagement() {
         }
       }
     }
-
     // setClient(__clients[0 ])
   }, [client]);
   useEffect(() => {
@@ -469,7 +470,7 @@ function BolManagement() {
     elapse: item.elapse,
     turnaroundtime: item.turnaroundtime,
     priority: item.priority,
-    pages: item.pages
+    pages: item.pages,
   }));
 
   return (
@@ -742,7 +743,7 @@ function BolManagement() {
                     pageCount={pageCount}
                     pageNumber={page}
                     onFilterStatus={onFilterStatus}
-                  
+                    clientName={client ? client : getDefaultClient()}
                   />
                 </div>
               </CardContent>

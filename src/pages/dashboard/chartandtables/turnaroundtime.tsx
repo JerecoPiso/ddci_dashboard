@@ -234,8 +234,10 @@ function TurnAroundTime() {
     setCookie("_selectedDate", day ?? new Date())
   };
   const getDefaultClient = () => {
-    const __clients = JSON.parse(Cookies.get("_clients") || "");
-    return __clients[0];
+    if (Cookies.get("_clients")) {
+      const __clients = JSON.parse(Cookies.get("_clients") || "");
+      return __clients[0];
+    }
   };
   useEffect(() => {
     if (Cookies.get("token")) {
