@@ -70,6 +70,8 @@ function BolManagement() {
   const [, setClients] = useState<Clients[]>([]);
   const [bols, setBols] = useState<BOL[]>([]);
   const hasFetchedData = useRef(false);
+  const [roles, setRoles] = useState<string>();
+
   const [accuracyChartData, setAccuracyChartData] = useState<AccuracyData[]>(
     () => generateAccuracyData(ranges, colors)
   );
@@ -395,6 +397,10 @@ function BolManagement() {
       // }
     }
   };
+  const simulateSave = async () => {
+    const clientName = client ? client : getDefaultClient();
+    await axios.patch(`${baseUrl}system/simulate-save/${clientName}`);
+  };
   const filterChange = (filter: string) => {
     console.log(filter);
   };
@@ -452,6 +458,7 @@ function BolManagement() {
     // setClient(__clients[0 ])
   }, [client]);
   useEffect(() => {
+    setRoles(JSON.stringify(Cookies.get("_authorities")));
     if (hasFetchedData.current === false) {
       getAccuracies();
       getBOL(status === "ALL" ? "getDocument" : "getDocumentByStatus");
@@ -507,6 +514,14 @@ function BolManagement() {
                 onClientChange={handleClient}
                 activeClient={client}
               />
+              {roles?.includes("ROLE_SYSTEM") && (
+                <Button
+                  onClick={() => simulateSave()}
+                  className="bg-emerald-600 text-sm font-normal text-white dark:bg-slate-700 py-[10px] px-3 rounded-sm"
+                >
+                  SIMULATE SAVE
+                </Button>
+              )}
             </div>
           </div>
         </CardTitle>
