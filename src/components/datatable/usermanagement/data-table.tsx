@@ -244,7 +244,7 @@ export function DataTable<TData, TValue>({
                   {row.getVisibleCells().map((cell, index) => (
                     <TableCell key={cell.id}>
                       {/* {JSON.stringify(cell.row.original)} */}
-                      {index === 9 ? (
+                      {index === 10 ? (
                         <DataTableRowActions
                           onDelete={() => handleDelete(cell.row.original)}
                           onUpdate={() => handleUpdate(cell.row.original)}

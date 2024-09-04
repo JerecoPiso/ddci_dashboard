@@ -96,6 +96,7 @@ function UserManagement() {
           password: any;
           clients: any;
           athorities: any;
+          
         }) => {
           _users.push({
             id: el.id,

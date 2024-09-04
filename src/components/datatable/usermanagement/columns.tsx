@@ -78,6 +78,22 @@ export const columns: ColumnDef<User>[] = [
     
   },
   {
+    accessorKey: "authorities",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Role" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" font-medium">
+            {row.getValue("authorities")}
+          </span>
+        </div>
+      );
+    },
+    
+  },
+  {
     accessorKey: "emailAddress",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email Address" />
