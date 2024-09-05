@@ -54,7 +54,7 @@ function UserManagement() {
     "ROLE_CLIENT",
     "ROLE_DOCUMENT",
     "ROLE_SYSTEM",
-    // "ROLE_QC",
+    "ROLE_QC",
   ];
   const [openAddModal, setOpenAddModal] = useState(false);
   const [archive, setArchive] = useState<boolean>(false);
