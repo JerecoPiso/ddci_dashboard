@@ -38,7 +38,7 @@ function ClientSelector({ onClientChange, activeClient }: Clients) {
       __clients.forEach((el: any) => {
         clientsList.push(el);
       });
-      setClients(clientsList);
+      setClients(clientsList.sort());
     }
   
   }, []);

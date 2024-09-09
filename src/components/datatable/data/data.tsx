@@ -25,4 +25,9 @@ export const statuses = [
     label: "ERROR",
     icon: PlusCircleIcon,
   },
+  {
+    value: "QCED",
+    label: "QCED",
+    icon: PlusCircleIcon,
+  },
 ];

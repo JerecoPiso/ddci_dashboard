@@ -55,6 +55,7 @@ function UserManagement() {
     "ROLE_DOCUMENT",
     "ROLE_SYSTEM",
     "ROLE_QC",
+    "ROLE_AUDITOR",
   ];
   const [openAddModal, setOpenAddModal] = useState(false);
   const [archive, setArchive] = useState<boolean>(false);
@@ -495,7 +496,7 @@ function UserManagement() {
                 <div className="md:col-span-1 col-span-2">
                   <Label>Clients</Label>
                   <div className="flex flex-wrap gap-x-4">
-                    {clients.map((option) => (
+                    {clients.sort().map((option) => (
                       <label key={option} className="flex items-center">
                         <input
                           type="checkbox"
@@ -605,7 +606,7 @@ function UserManagement() {
                 <div className="md:col-span-1 col-span-2">
                   <Label>Clients</Label>
                   <div className="flex flex-wrap gap-x-4">
-                    {clients.map((option) => (
+                    {clients.sort().map((option) => (
                       <label key={option} className="flex items-center">
                         <input
                           type="checkbox"
