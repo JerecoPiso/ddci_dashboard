@@ -194,6 +194,7 @@ function Dashboard() {
   const [previousHourlyArrivalTotal, setPreviousHourlyArrivalTotal] =
     useState<number>(0);
   const [counts, setCounts] = useState<Counts>({
+    processed: 0,
     billed: 0,
     rejects: 0,
     accuracy: 0,
@@ -201,8 +202,11 @@ function Dashboard() {
     error: 0,
     uploaded: 0,
     ocred: 0,
+    qced: 0,
+    audited: 0,
   });
   const [previousDayCounts, setPreviousDayCounts] = useState<Counts>({
+    processed: 0,
     billed: 0,
     rejects: 0,
     accuracy: 0,
@@ -210,6 +214,8 @@ function Dashboard() {
     error: 0,
     uploaded: 0,
     ocred: 0,
+    qced: 0,
+    audited: 0,
   });
   const handleClient = (_client: string) => {
     hasFetched.current = false;
@@ -270,22 +276,27 @@ function Dashboard() {
       headers
     );
     if (response.data.details) {
-      // console.log(response.data.details);
+      console.log(response.data.details);
       const _values = response.data.details;
       const _totalReceive =
         _values.VERIFIED +
         _values.ERROR +
         _values.OCRED +
         _values.REJECTED +
-        _values.UPLOADED;
+        _values.UPLOADED +
+        _values.QCED +
+        _values.AUDITED;
       setTotalReceive(
         _values.VERIFIED +
           _values.ERROR +
           _values.OCRED +
           _values.REJECTED +
-          _values.UPLOADED
+          _values.UPLOADED +
+          _values.QCED +
+          _values.AUDITED
       );
       setCounts({
+        processed: _values.VERIFIED + _values.QCED + _values.AUDITED,
         billed: _values.VERIFIED,
         rejects: _values.REJECTED,
         accuracy: _values.ACCURACY * 100,
@@ -293,6 +304,8 @@ function Dashboard() {
         error: _values.ERROR,
         uploaded: _values.UPLOADED,
         ocred: _values.OCRED,
+        qced: _values.QCED,
+        audited: _values.AUDITED,
       });
     }
     if (yesterday.data.details) {
@@ -302,9 +315,12 @@ function Dashboard() {
         _values.ERROR +
         _values.OCRED +
         _values.REJECTED +
-        _values.UPLOADED;
+        _values.UPLOADED + 
+        _values.QCED +
+        _values.AUDITED;
       // setPreviousTotalReceive(_values.EDITED + _values.ERROR + _values.OCRED + _values.REJECTED + _values.UPLOADED);
       setPreviousDayCounts({
+        processed: _values.VERIFIED + _values.QCED + _values.AUDITED,
         billed: _values.VERIFIED,
         rejects: _values.REJECTED,
         accuracy: _values.ACCURACY * 100,
@@ -312,6 +328,8 @@ function Dashboard() {
         error: _values.ERROR,
         uploaded: _values.UPLOADED,
         ocred: _values.OCRED,
+        qced: _values.QCED,
+        audited: _values.AUDITED,
       });
     }
     // hasFetched.current = false;
@@ -455,8 +473,7 @@ function Dashboard() {
         });
         console.error("Failed to download the report:", error.response.data);
         setIsDownloading(false);
-      },
-      
+      }
     );
   };
   // const downloadReport = () => {
@@ -592,14 +609,14 @@ function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Billed Documents
+              Processed Document
             </CardTitle>
             <CheckCheckIcon className="h-5 w-5" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{counts.billed}</div>
+            <div className="text-2xl font-bold">{counts.processed}</div>
             <p className="text-xs text-muted-foreground">
-              {countComparer(counts.billed, previousDayCounts.billed)}
+              {countComparer(counts.processed, previousDayCounts.processed)}
             </p>
           </CardContent>
         </Card>
@@ -725,16 +742,25 @@ function Dashboard() {
                     label: "Billed",
                     color: "hsl(var(--chart-3))",
                   },
-                  error: {
-                    label: "Error",
+                  qced: {
+                    label: "Qced",
                     color: "hsl(var(--chart-4))",
                   },
+                  audited: {
+                    label: "Audited",
+                    color: "hsl(var(--chart-5))",
+                  },
+
                   rejected: {
                     label: "Rejected",
-                    color: "hsl(var(--chart-3))",
+                    color: "hsl(var(--chart-6))",
+                  },
+                  error: {
+                    label: "Error",
+                    color: "hsl(var(--chart-7))",
                   },
                 }}
-                className="h-[140px] w-full"
+                className="h-[200px] w-full"
               >
                 <BarChart
                   margin={{
@@ -763,16 +789,29 @@ function Dashboard() {
                       fill: "var(--color-billed)",
                     },
                     {
-                      activity: "error",
-                      value: (counts.error / totalReceive) * 100,
+                      activity: "qced",
+                      value: (counts.qced / totalReceive) * 100,
                       // label: "245/360 kcal",
-                      fill: "var(--color-error)",
+                      fill: "var(--color-qced)",
                     },
+                    {
+                      activity: "audited",
+                      value: (counts.audited / totalReceive) * 100,
+                      // label: "245/360 kcal",
+                      fill: "var(--color-audited)",
+                    },
+
                     {
                       activity: "rejected",
                       value: (counts.rejects / totalReceive) * 100,
                       // label: "245/360 kcal",
                       fill: "var(--color-rejected)",
+                    },
+                    {
+                      activity: "error",
+                      value: (counts.error / totalReceive) * 100,
+                      // label: "245/360 kcal",
+                      fill: "var(--color-error)",
                     },
                   ]}
                   layout="vertical"
@@ -834,9 +873,19 @@ function Dashboard() {
                 </div>
                 <Separator orientation="vertical" className="mx-2 h-10 w-px" />
                 <div className="grid flex-1 auto-rows-min gap-0.5">
-                  <div className="text-xs text-muted-foreground">Error</div>
+                  <div className="text-xs text-muted-foreground">Qced</div>
                   <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
-                    {counts.error}
+                    {counts.qced}
+                    {/* <span className="text-xs font-normal text-muted-foreground">
+                      / {totalReceive}
+                    </span> */}
+                  </div>
+                </div>
+                <Separator orientation="vertical" className="mx-2 h-10 w-px" />
+                <div className="grid flex-1 auto-rows-min gap-0.5">
+                  <div className="text-xs text-muted-foreground">Audited</div>
+                  <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
+                    {counts.audited}
                     {/* <span className="text-xs font-normal text-muted-foreground">
                       / {totalReceive}
                     </span> */}
@@ -847,6 +896,16 @@ function Dashboard() {
                   <div className="text-xs text-muted-foreground">Rejected</div>
                   <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
                     {counts.rejects}
+                    {/* <span className="text-xs font-normal text-muted-foreground">
+                      / {totalReceive}
+                    </span> */}
+                  </div>
+                </div>
+                <Separator orientation="vertical" className="mx-2 h-10 w-px" />
+                <div className="grid flex-1 auto-rows-min gap-0.5">
+                  <div className="text-xs text-muted-foreground">Error</div>
+                  <div className="flex items-baseline gap-1 text-xs font-bold tabular-nums leading-none">
+                    {counts.error}
                     {/* <span className="text-xs font-normal text-muted-foreground">
                       / {totalReceive}
                     </span> */}

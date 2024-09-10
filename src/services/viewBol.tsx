@@ -25,7 +25,7 @@ export const getImage = async (
   );
   const blob = new Blob([response.data], { type: "jpg" });
   const url = URL.createObjectURL(blob);
-  console.log(url);
+  // console.log(url);
   return url;
 };
 export const getOcrVerifiedData = async (

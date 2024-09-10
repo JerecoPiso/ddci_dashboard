@@ -2,6 +2,7 @@ export interface Clients {
   name: string;
 }
 export interface Counts {
+  processed: number,
   billed: number;
   rejects: number;
   receives: number;
@@ -9,6 +10,8 @@ export interface Counts {
   error: number;
   uploaded: number;
   ocred: number;
+  qced: number;
+  audited: number
 }
 export interface HourlyArrival {
   time: string;

@@ -1,11 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;1,900&family=Poppins:wght@500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;1,900&family=Poppins:wght@500&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-   
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -28,9 +27,13 @@
     --radius: 0.5rem;
     --chart-1: 221.2 83.2% 53.3%;
     --chart-2: 212 95% 68%;
-    --chart-3: 216 92% 60%;
-    --chart-4: 210 98% 78%;
-    --chart-5: 212 97% 87%;
+    --chart-3: 221.2 83.2% 53.3%;
+    --chart-4: 212 95% 68%;
+    --chart-5: 221.2 83.2% 53.3%;
+    --chart-6: 212 95% 68%;
+    --chart-7: 221.2 83.2% 53.3%;
+    /* --chart-8: 194, 69%, 65%;
+    --chart-9: 136, 65%, 50%; */
     /* --chart-1: 221.2 83.2% 53.3%;
     --chart-2: 212 95% 68%;
     --chart-3: 216 92% 60%;
@@ -42,13 +45,12 @@
     --chart-9: 136, 65%, 50%; */
     --chart-01: 212, 75%, 16%;
     --chart-02: 211, 70%, 26%;
-    --chart-03:  214, 65%, 35%;
-    --chart-04:  208, 61%, 44%;
+    --chart-03: 214, 65%, 35%;
+    --chart-04: 208, 61%, 44%;
     --chart-05: 210, 100%, 75%;
   }
 
   .dark {
-    
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -74,14 +76,14 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%; */
     --chart-1: 221.2 83.2% 53.3%;
-    --chart-2: 212 100% 68%;
-    --chart-3: 216 92% 60%;
-    --chart-4: 210 58% 78%;
-    --chart-5: 212 97% 87%;
-    --chart-6: 239, 100%, 66%;
-    --chart-7: 211, 79%, 56%;
-    --chart-8: 194, 69%, 65%;
-    --chart-9: 136, 65%, 50%;
+    --chart-2: 212 100% 40%;
+    --chart-3: 221.2 83.2% 53.3%;
+    --chart-4: 212 100% 40%;
+    --chart-5: 221.2 83.2% 53.3%;
+    --chart-6: 212 100% 40%;
+    --chart-7: 221.2 83.2% 53.3%;
+    --chart-8: 212 100% 40%;
+    --chart-9: 221.2 83.2% 53.3%;
 
     --chart-01: 210, 100%, 30%;
     --chart-02: 210, 100%, 45%;
@@ -90,8 +92,8 @@
     --chart-05: 210, 100%, 75%;
   }
 }
-*{
-  font-family: 'Poppins'
+* {
+  font-family: "Poppins";
 }
 @layer base {
   * {
@@ -101,11 +103,11 @@
     @apply bg-background text-foreground;
   }
 }
-@layer components{
-  .bg-main{
-      @apply main-color
+@layer components {
+  .bg-main {
+    @apply main-color;
   }
 }
-.MuiPopover-paper{
+.MuiPopover-paper {
   padding: 1em;
 }

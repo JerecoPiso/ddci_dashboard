@@ -30,4 +30,9 @@ export const statuses = [
     label: "QCED",
     icon: PlusCircleIcon,
   },
+  {
+    value: "AUDITED",
+    label: "AUDITED",
+    icon: PlusCircleIcon,
+  },
 ];
