@@ -11,7 +11,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Calendar as CalendarIcon, TriangleAlert } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  CloudLightning,
+  TriangleAlert,
+} from "lucide-react";
 import { useEffect, useState, useRef, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -410,6 +414,19 @@ function BolManagement() {
       }
     );
   };
+  const recalculateAccuracy = async () => {
+    const clientName = client ? client : getDefaultClient();
+    await axios.patch(
+      `${baseUrl}system/recalculate-accuracy/${clientName}`,
+      {},
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      }
+    );
+  };
   const filterChange = (filter: string) => {
     console.log(filter);
   };
@@ -524,12 +541,35 @@ function BolManagement() {
                 activeClient={client}
               />
               {roles?.includes("ROLE_SYSTEM") && (
-                <Button
-                  onClick={() => simulateSave()}
-                  className="bg-emerald-600 text-sm font-normal text-white dark:bg-slate-700 py-[10px] px-3 rounded-sm"
-                >
-                  SIMULATE SAVE
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button className="bg-blue-800 text-sm font-normal hover:bg-blue-700 text-white dark:bg-slate-700 pb-2 pt-[8px] px-3 rounded-sm">
+                      <CloudLightning />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 mr-5 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => simulateSave()}
+                      className="flex gap-x-3 text-sm border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
+                    >
+                      SIMULATE SAVE
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => recalculateAccuracy()}
+                      className="mt-1 flex gap-x-3 text-sm border border-slate-800 rounded-md p-2 w-full  hover:bg-slate-900 hover:text-slate-200"
+                    >
+                      RECALCULATE ACCURACY
+                    </button>
+                  </PopoverContent>
+                </Popover>
+                // <Button
+                //   onClick={() => simulateSave()}
+                //   className="bg-emerald-600 text-sm font-normal text-white dark:bg-slate-700 py-[10px] px-3 rounded-sm"
+                // >
+                //   SIMULATE SAVE
+                // </Button>
               )}
             </div>
           </div>
