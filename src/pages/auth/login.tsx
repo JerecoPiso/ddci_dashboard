@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
-import ddc_connect from "/new.png";
-import ddc_connect3 from "/ddc_connect3.png";
+import apex from "/apex.png";
+// import apex from "/apex.png";
 import {
   Card,
   CardContent,
@@ -86,19 +86,21 @@ function Login() {
   });
   return (
     <div className="flex justify-center items-center w-full border h-[100vh]">
+
       <form onSubmit={login} className="md:w-[25em] w-[80%] p-2">
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-2xl -mt-20">
               <img
-                src={theme === "dark" ? ddc_connect3 : ddc_connect}
+                // src={theme === "dark" ? ddc_connect3 : ddc_connect}
+                src={theme === "dark" ? apex : apex}
                 alt=""
-                className="h-16 w-full -mt-4"
+                className="h-40 w-full -mt-4 border rounded-md "
               />
-              Login
+             
             </CardTitle>
-            <CardDescription>
-              Enter your username below to login to your account.
+            <CardDescription className="text-center">
+            Advanced Platform for Enhanced Extraction
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
