@@ -95,7 +95,7 @@ function Login() {
                 // src={theme === "dark" ? ddc_connect3 : ddc_connect}
                 src={theme === "dark" ? apex : apex}
                 alt=""
-                className="h-40 w-full -mt-4 border rounded-md "
+                className="h-40 w-full -mt-4 rounded-md "
               />
              
             </CardTitle>

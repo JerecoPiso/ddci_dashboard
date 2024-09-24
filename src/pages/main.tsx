@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 // import ddc_connect from "/new.png";
 // import ddc_connect3 from "/ddc_connect3.png";
-import apex from "/apex.png";
+import apex from "/apex_crop.png";
 import { User2, SquareChartGantt, ImageDown, Timer } from "lucide-react";
 import {
   AlertDialog,
@@ -231,12 +231,13 @@ function Main() {
             </SheetContent>
           </Sheet>
           <div>
+            <p></p>
             <img
               // src={theme === "dark" ? ddc_connect3 : ddc_connect}
               src={theme === "dark" ? apex : apex}
               alt=""
               // className="h-[3.5em] w-full md:-mt-2 mt-0 -ml-[10px]"
-              className="h-[4em] w-[20em] md:-mt-2 mt-0 -ml-[1px] rounded-md border"
+              className="h-[5em] w-[14em] md:-mt-2 mt-0  rounded-sm"
 
             />
           </div>
@@ -280,7 +281,7 @@ function Main() {
           </AlertDialogContent>
         </AlertDialog>
 
-        <div className="flex h-full flex-1 flex-col px-[22px] md:flex pt-3">
+        <div className="flex h-full flex-1 flex-col px-[22px] md:flex">
           <Outlet />
         </div>
       </div>
