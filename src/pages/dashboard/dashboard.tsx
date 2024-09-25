@@ -276,7 +276,7 @@ function Dashboard() {
       headers
     );
     if (response.data.details) {
-      console.log(response.data.details);
+      // console.log(response.data.details);
       const _values = response.data.details;
       const _totalReceive =
         _values.VERIFIED +

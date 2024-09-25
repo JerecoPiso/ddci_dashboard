@@ -85,7 +85,7 @@ function UserManagement() {
     });
     if (response.status === 200) {
       const _users: Users[] = [];
-      console.log(response.data.details);
+      // console.log(response.data.details);
       response.data.details.forEach(
         (el: {
           id: any;
