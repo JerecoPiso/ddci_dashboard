@@ -86,7 +86,6 @@ function Login() {
   });
   return (
     <div className="flex justify-center items-center w-full border h-[100vh]">
-
       <form onSubmit={login} className="md:w-[25em] w-[80%] p-2">
         <Card className="w-full">
           <CardHeader>
@@ -95,9 +94,8 @@ function Login() {
                 // src={theme === "dark" ? ddc_connect3 : ddc_connect}
                 src={theme === "dark" ? apex : apex}
                 alt=""
-                className="h-40 w-full -mt-4 rounded-md "
+                className="h-20 mt-4 w-full rounded-md "
               />
-             
             </CardTitle>
             <CardDescription className="text-center">
             Advanced Platform for Enhanced Extraction

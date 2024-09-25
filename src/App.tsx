@@ -11,20 +11,39 @@ import { ThemeProvider } from "@/components/theme-provider";
 import UserManagement from "./pages/dashboard/sidebarlinks/usermanagement";
 import Dashboard from "./pages/dashboard/dashboard";
 import Admin from "./pages/dashboard/admin";
-import { createContext } from "react";
+import { useEffect, createContext } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
 //local
-// const api = "http://192.168.23.84:8007/ddcic/api/v1/"
-
+// const api = "http://192.168.23.84:8007/apex/api/v1/"
 //server
-
-const api = "http://210.213.193.4:8007/ddcic/api/v1/"
+const api = "http://210.213.193.4:8007/apex/api/v1/";
 export const BaseUrlContext = createContext(api);
 function App() {
+  useEffect(() => {
+    if (Cookies.get("token")) {
+      try {
+        const intervalId = setInterval(async () => {
+          await axios.post(`${api}credential/refresh-token`, [], {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("token")}`,
+            },
+          });
+        }, 120000);
+        return () => {
+          clearInterval(intervalId);
+        };
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }, []);
   return (
     <>
       <BaseUrlContext.Provider value={api}>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <BrowserRouter basename="/ddci/">
+          <BrowserRouter basename="/apex/">
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/dashboard" element={<Main />}>
