@@ -57,12 +57,12 @@ function Main() {
     Cookies.remove("_clients");
     Cookies.remove("_selectedClient");
     Cookies.remove("_authorities");
-    navigate("/");
+    navigate("/login");
   };
   useEffect(() => {
     setRoles(JSON.stringify(Cookies.get("_authorities")));
     if (!Cookies.get("token")) {
-      navigate("/");
+      navigate("/login");
     }
   }, [navigate]);
   return (
@@ -72,11 +72,11 @@ function Main() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                to="/dashboard/"
+                to="/"
                 className={`${
-                  currentPath === "/dashboard/" ||
-                  currentPath === "/dashboard/" ||
-                  currentPath === "/dashboard/"
+                  currentPath === "/" ||
+                  currentPath === "/" ||
+                  currentPath === "/"
                     ? "bg-accent"
                     : "text-white"
                 } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
@@ -90,11 +90,11 @@ function Main() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                to="/dashboard/bolmanagement"
+                to="/bolmanagement"
                 className={`${
-                  currentPath === "/dashboard/bolmanagement" ||
-                  currentPath === "/dashboard/bolmanagement" ||
-                  currentPath === "/dashboard/bolmanagement"
+                  currentPath === "/bolmanagement" ||
+                  currentPath === "/bolmanagement" ||
+                  currentPath === "/bolmanagement"
                     ? "bg-accent"
                     : "text-white"
                 } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
@@ -108,11 +108,11 @@ function Main() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                to="/dashboard/currentvolume"
+                to="/currentvolume"
                 className={`${
-                  currentPath === "/dashboard/currentvolume" ||
-                  currentPath === "/dashboard/currentvolume" ||
-                  currentPath === "/dashboard/currentvolume"
+                  currentPath === "/currentvolume" ||
+                  currentPath === "/currentvolume" ||
+                  currentPath === "/currentvolume"
                     ? "bg-accent"
                     : "text-white"
                 } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
@@ -126,11 +126,11 @@ function Main() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link
-                to="/dashboard/turnaroundtime"
+                to="/turnaroundtime"
                 className={`${
-                  currentPath === "/dashboard/turnaroundtime" ||
-                  currentPath === "/dashboard/turnaroundtime" ||
-                  currentPath === "/dashboard/turnaroundtime"
+                  currentPath === "/turnaroundtime" ||
+                  currentPath === "/turnaroundtime" ||
+                  currentPath === "/turnaroundtime"
                     ? "bg-accent"
                     : "text-white"
                 } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
@@ -146,9 +146,9 @@ function Main() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  to="/dashboard/usermanagement"
+                  to="/usermanagement"
                   className={`${
-                    currentPath === "/dashboard/usermanagement"
+                    currentPath === "/usermanagement"
                       ? "bg-accent"
                       : "text-white"
                   } flex h-9 w-1  items-center justify-center rounded-lg  transition-colors hover:text-foreground md:h-8 md:w-8`}
@@ -176,11 +176,11 @@ function Main() {
             <SheetContent side="left" className="sm:max-w-xs">
               <nav className="grid text-lg font-medium mt-4 gap-y-2">
                 <Link
-                  to="/dashboard/"
+                  to="/"
                   className={`${
-                    currentPath === "/dashboard/" ||
-                    currentPath === "/dashboard/" ||
-                    currentPath === "/dashboard/"
+                    currentPath === "/" ||
+                    currentPath === "/" ||
+                    currentPath === "/"
                       ? "bg-accent"
                       : "text-white"
                   } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}
@@ -189,11 +189,11 @@ function Main() {
                   Dashboard
                 </Link>
                 <Link
-                  to="/dashboard/bolmanagement"
+                  to="/bolmanagement"
                   className={`${
-                    currentPath === "/dashboard/bolmanagement" ||
-                    currentPath === "/dashboard/bolmanagement" ||
-                    currentPath === "/dashboard/bolmanagement"
+                    currentPath === "/bolmanagement" ||
+                    currentPath === "/bolmanagement" ||
+                    currentPath === "/bolmanagement"
                       ? "bg-accent"
                       : "text-white"
                   } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}
@@ -202,11 +202,11 @@ function Main() {
                   BOL Management
                 </Link>
                 <Link
-                  to="/dashboard/currentvolume"
+                  to="/currentvolume"
                   className={`${
-                    currentPath === "/dashboard/currentvolume" ||
-                    currentPath === "/dashboard/currentvolume" ||
-                    currentPath === "/dashboard/currentvolume"
+                    currentPath === "/currentvolume" ||
+                    currentPath === "/currentvolume" ||
+                    currentPath === "/currentvolume"
                       ? "bg-accent"
                       : "text-white"
                   } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}
@@ -215,11 +215,11 @@ function Main() {
                   Current Volume
                 </Link>
                 <Link
-                  to="/dashboard/turnaroundtime"
+                  to="turnaroundtime"
                   className={`${
-                    currentPath === "/dashboard/turnaroundtime" ||
-                    currentPath === "/dashboard/turnaroundtime" ||
-                    currentPath === "/dashboard/turnaroundtime"
+                    currentPath === "/turnaroundtime" ||
+                    currentPath === "/turnaroundtime" ||
+                    currentPath === "/turnaroundtime"
                       ? "bg-accent"
                       : "text-white"
                   } flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground p-2 rounded-md`}

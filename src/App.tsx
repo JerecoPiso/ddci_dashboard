@@ -43,10 +43,10 @@ function App() {
     <>
       <BaseUrlContext.Provider value={api}>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <BrowserRouter basename="/apex/">
+          <BrowserRouter basename="/apex/panel/">
             <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/dashboard" element={<Main />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Main />}>
                 <Route path="" element={<Dashboard />}></Route>
                 <Route index path="bolmanagement" element={<BolManagement />} />
                 {/* <Route path="statistics" element={<Statistics />} />

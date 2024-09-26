@@ -63,7 +63,7 @@ function Login() {
           "_authorities",
           JSON.stringify(response.data.details.authorities)
         );
-        navigate("/dashboard/");
+        navigate("/");
       }
       setIsLogin(false);
     } catch (err: any) {
@@ -80,7 +80,7 @@ function Login() {
   };
   useEffect(() => {
     if (Cookies.get("token")) {
-      navigate("/dashboard/bolmanagement");
+      navigate("/bolmanagement");
     }
     hasLoad.current = true;
   });
